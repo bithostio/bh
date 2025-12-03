@@ -1,0 +1,140 @@
+package ui
+
+import (
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/fatih/color"
+)
+
+var (
+	Green  = color.New(color.FgGreen).SprintFunc()
+	Red    = color.New(color.FgRed).SprintFunc()
+	Yellow = color.New(color.FgYellow).SprintFunc()
+	Cyan   = color.New(color.FgCyan).SprintFunc()
+	Bold   = color.New(color.Bold).SprintFunc()
+)
+
+// PrintTable prints data in aligned columns
+// First row is treated as headers (bolded)
+func PrintTable(rows [][]string) {
+	if len(rows) == 0 {
+		return
+	}
+
+	widths := calculateWidths(rows)
+
+	// Print header
+	printRow(rows[0], widths, true)
+	printDivider(widths)
+
+	// Print data rows
+	for _, row := range rows[1:] {
+		printRow(row, widths, false)
+	}
+	fmt.Println()
+}
+
+func calculateWidths(rows [][]string) []int {
+	if len(rows) == 0 {
+		return nil
+	}
+	widths := make([]int, len(rows[0]))
+	for _, row := range rows {
+		for i, col := range row {
+			if i < len(widths) && len(col) > widths[i] {
+				widths[i] = len(col)
+			}
+		}
+	}
+	return widths
+}
+
+func printRow(row []string, widths []int, header bool) {
+	var parts []string
+	for i, col := range row {
+		if i >= len(widths) {
+			break
+		}
+		padded := fmt.Sprintf("%-*s", widths[i], col)
+		if header {
+			parts = append(parts, Bold(padded))
+		} else {
+			parts = append(parts, padded)
+		}
+	}
+	fmt.Println(strings.Join(parts, "  "))
+}
+
+func printDivider(widths []int) {
+	total := 0
+	for _, w := range widths {
+		total += w
+	}
+	total += (len(widths) - 1) * 2 // spacing
+	fmt.Println(strings.Repeat("─", total))
+}
+
+// Header returns a bold header
+func Header(text string) string {
+	return Bold(text)
+}
+
+// StepHeader returns a colored step header for wizards
+func StepHeader(step int, text string) string {
+	return Cyan(fmt.Sprintf("Step %d: %s", step, text))
+}
+
+// Divider returns a divider line
+func Divider(length int) string {
+	return strings.Repeat("─", length)
+}
+
+// Truncate truncates a string to maxLen, adding "..." if needed
+func Truncate(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	return s[:maxLen-3] + "..."
+}
+
+// FormatMoney formats a float as currency
+func FormatMoney(amount float64) string {
+	return fmt.Sprintf("$%.2f", amount)
+}
+
+// FormatEnabled returns colored "Enabled" or "Disabled"
+func FormatEnabled(enabled bool) string {
+	if enabled {
+		return Green("Enabled")
+	}
+	return "Disabled"
+}
+
+// ShowProgress displays a spinner with a message
+// Returns a function to call when done
+func ShowProgress(message string) func() {
+	done := make(chan bool)
+
+	go func() {
+		frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+		i := 0
+		for {
+			select {
+			case <-done:
+				fmt.Printf("\r%s %s\n", Green("✓"), message)
+				return
+			default:
+				fmt.Printf("\r%s %s", frames[i], message)
+				i = (i + 1) % len(frames)
+				time.Sleep(100 * time.Millisecond)
+			}
+		}
+	}()
+
+	return func() {
+		done <- true
+		time.Sleep(200 * time.Millisecond)
+	}
+}
