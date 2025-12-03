@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/bithostio/bh/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -16,11 +17,13 @@ var rootCmd = &cobra.Command{
   - List and delete servers
 
 Get started by running: bh auth`,
+	SilenceErrors: true, // We handle errors ourselves
+	SilenceUsage:  true, // Don't show usage on errors
 }
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, ui.Red(err.Error()))
 		os.Exit(1)
 	}
 }
