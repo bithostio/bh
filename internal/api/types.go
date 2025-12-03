@@ -1,0 +1,116 @@
+package api
+
+// ErrorResponse represents the error response from the API
+type ErrorResponse struct {
+	Errors []string `json:"errors"`
+}
+
+// BalanceResponse represents the balance response
+type BalanceResponse struct {
+	Balance float64 `json:"balance"`
+}
+
+// Server represents a server resource
+type Server struct {
+	ID                 int      `json:"id"`
+	Name               string   `json:"name"`
+	Pending            bool     `json:"pending"`
+	Power              string   `json:"power"`
+	CostSoFar          float64  `json:"cost_so_far"`
+	Status             int      `json:"status"`
+	BackupsEnabled     bool     `json:"backups_enabled"`
+	Message            *string  `json:"message"`
+	IPAddress          string   `json:"ip_address"`
+	PrivateIPAddress   string   `json:"private_ip_address"`
+	IPAddressV6        string   `json:"ip_address_v6"`
+	PrivateIPAddressV6 string   `json:"private_ip_address_v6"`
+	ProviderID         int      `json:"provider_id"`
+}
+
+// Provider represents a cloud provider
+type Provider struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+// Region represents a geographic region
+type Region struct {
+	ID                 int      `json:"id"`
+	Name               string   `json:"name"`
+	Slug               string   `json:"slug"`
+	Origin             string   `json:"origin"`
+	Number             int      `json:"number"`
+	AvailableSizeSlugs []string `json:"available_size_slugs"`
+}
+
+// Size represents a server size/plan
+type Size struct {
+	ID           int     `json:"id"`
+	Name         string  `json:"name"`
+	Slug         string  `json:"slug"`
+	Price        float64 `json:"price"`
+	PricePerHour float64 `json:"price_per_hour"`
+	WindowsFee   float64 `json:"windows_fee"`
+	Memory       int     `json:"memory"`
+	Processor    string  `json:"processor"`
+	Bandwidth    int     `json:"bandwidth"`
+	Disk         int     `json:"disk"`
+	Kind         string  `json:"kind"`
+}
+
+// Image represents an OS image
+type Image struct {
+	ID           int    `json:"id"`
+	Name         string `json:"name"`
+	Distribution string `json:"distribution"`
+	Windows      bool   `json:"windows"`
+	Architecture string `json:"architecture"`
+}
+
+// SSHKey represents an SSH public key
+type SSHKey struct {
+	ID    int    `json:"id"`
+	Key   string `json:"key"`
+	Label string `json:"label"`
+}
+
+// CreateServerRequest represents the request to create a server
+type CreateServerRequest struct {
+	Name           string `json:"name"`
+	SizeID         int    `json:"size_id"`
+	RegionID       int    `json:"region_id"`
+	ImageID        int    `json:"image_id"`
+	ProviderID     int    `json:"provider_id"`
+	KeyIDs         []int  `json:"key_ids"`
+	BackupsEnabled bool   `json:"backups_enabled"`
+	Terms          bool   `json:"terms"`
+}
+
+// Response wrappers for API responses
+type ServersResponse struct {
+	Servers []Server `json:"servers"`
+}
+
+type ServerResponse struct {
+	Server Server `json:"server"`
+}
+
+type ProvidersResponse struct {
+	Providers []Provider `json:"providers"`
+}
+
+type RegionsResponse struct {
+	Regions []Region `json:"regions"`
+}
+
+type SizesResponse struct {
+	Sizes []Size `json:"sizes"`
+}
+
+type ImagesResponse struct {
+	Images []Image `json:"images"`
+}
+
+type KeysResponse struct {
+	Keys []SSHKey `json:"keys"`
+}
