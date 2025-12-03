@@ -29,7 +29,7 @@ func runBalance(cmd *cobra.Command, args []string) error {
 
 	balance, err := client.GetBalance()
 	if err != nil {
-		return fmt.Errorf(api.HandleError(err))
+		return err
 	}
 
 	displayBalance(balance)

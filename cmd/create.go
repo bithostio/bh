@@ -36,7 +36,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	fmt.Println("\n" + ui.Cyan("Step 1: Select Provider"))
 	providers, err := client.ListProviders()
 	if err != nil {
-		return fmt.Errorf(api.HandleError(err))
+		return err
 	}
 	provider, err := ui.PromptProvider(providers)
 	if err != nil {
@@ -47,7 +47,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	fmt.Println("\n" + ui.Cyan("Step 2: Select Region"))
 	regions, err := client.ListRegions(provider.ID)
 	if err != nil {
-		return fmt.Errorf(api.HandleError(err))
+		return err
 	}
 	region, err := ui.PromptRegion(regions)
 	if err != nil {
@@ -58,7 +58,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	fmt.Println("\n" + ui.Cyan("Step 3: Select Size/Plan"))
 	sizes, err := client.ListSizes(region.ID, provider.ID)
 	if err != nil {
-		return fmt.Errorf(api.HandleError(err))
+		return err
 	}
 	size, err := ui.PromptSize(sizes)
 	if err != nil {
@@ -69,7 +69,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	fmt.Println("\n" + ui.Cyan("Step 4: Select Operating System"))
 	images, err := client.ListImages(provider.ID, "x86")
 	if err != nil {
-		return fmt.Errorf(api.HandleError(err))
+		return err
 	}
 	image, err := ui.PromptImage(images)
 	if err != nil {
@@ -80,7 +80,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	fmt.Println("\n" + ui.Cyan("Step 5: Select SSH Keys"))
 	keys, err := client.ListSSHKeys()
 	if err != nil {
-		return fmt.Errorf(api.HandleError(err))
+		return err
 	}
 	selectedKeyIDs, err := ui.PromptSSHKeys(keys)
 	if err != nil {
@@ -131,7 +131,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	stop()
 
 	if err != nil {
-		return fmt.Errorf(api.HandleError(err))
+		return err
 	}
 
 	fmt.Printf("\n%s Server created successfully!\n\n", ui.Green("✓"))

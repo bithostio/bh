@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/bithostio/bh/internal/api"
 	"github.com/bithostio/bh/internal/config"
 	"github.com/bithostio/bh/internal/ui"
@@ -30,7 +28,7 @@ func runServers(cmd *cobra.Command, args []string) error {
 
 	servers, err := client.ListServers()
 	if err != nil {
-		return fmt.Errorf(api.HandleError(err))
+		return err
 	}
 
 	ui.DisplayServers(servers)

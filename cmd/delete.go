@@ -62,7 +62,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 	stop()
 
 	if err != nil {
-		return fmt.Errorf(api.HandleError(err))
+		return err
 	}
 
 	fmt.Printf("%s Server %d deleted successfully\n", ui.Green("✓"), serverID)
