@@ -22,6 +22,12 @@ func DefaultConfigPath() (string, error) {
 	return filepath.Join(home, ".bh", "config.json"), nil
 }
 
+func New() *Config {
+	return &Config{
+		BaseURL: ensureTrailingSlash(getBaseURL()),
+	}
+}
+
 // Load reads the configuration from file or environment variables
 func Load() (*Config, error) {
 	// Check environment variable first

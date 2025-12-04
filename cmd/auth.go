@@ -42,13 +42,16 @@ func runAuth(cmd *cobra.Command, args []string) error {
 
 	apiKey = strings.TrimSpace(apiKey)
 
-	cfg := &config.Config{
-		APIKey:  apiKey,
-		BaseURL: "https://dashboard.bithost.io/api/v1",
+	cfg, err := config.Load()
+	if err != nil {
+		cfg = config.New()
 	}
 
+	// Update only the API key
+	cfg.APIKey = apiKey
+
 	if err := config.Save(cfg); err != nil {
-		return fmt.Errorf("save config: %w", err)
+		return err
 	}
 
 	configPath, _ := config.DefaultConfigPath()
