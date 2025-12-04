@@ -125,7 +125,6 @@ func (c *Client) do(method, path string, body interface{}, result interface{}) e
 
 	req.Header.Set("Authorization", "Bearer "+c.APIKey)
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
