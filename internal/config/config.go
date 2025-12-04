@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type Config struct {
@@ -27,7 +28,7 @@ func Load() (*Config, error) {
 	if apiKey := os.Getenv("BH_API_KEY"); apiKey != "" {
 		return &Config{
 			APIKey:  apiKey,
-			BaseURL: getBaseURL(),
+			BaseURL: ensureTrailingSlash(getBaseURL()),
 		}, nil
 	}
 
@@ -53,6 +54,9 @@ func Load() (*Config, error) {
 	if cfg.BaseURL == "" {
 		cfg.BaseURL = getBaseURL()
 	}
+
+	// Ensure BaseURL always ends with a slash
+	cfg.BaseURL = ensureTrailingSlash(cfg.BaseURL)
 
 	return &cfg, nil
 }
@@ -82,5 +86,13 @@ func getBaseURL() string {
 	if url := os.Getenv("BH_API_URL"); url != "" {
 		return url
 	}
-	return "https://dashboard.bithost.io/api/v1"
+	return "https://dashboard.bithost.io/api/v1/"
+}
+
+// ensureTrailingSlash ensures the URL ends with a trailing slash
+func ensureTrailingSlash(url string) string {
+	if !strings.HasSuffix(url, "/") {
+		return url + "/"
+	}
+	return url
 }
