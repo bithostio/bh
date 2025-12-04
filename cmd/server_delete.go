@@ -11,24 +11,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var deleteCmd = &cobra.Command{
-	Use:     "delete <server-id>",
-	Aliases: []string{"rm", "remove"},
-	Short:   "Delete a server",
-	Args:    cobra.ExactArgs(1),
-	RunE:    runDelete,
-}
-
 var (
 	forceDelete bool
 )
 
-func init() {
-	rootCmd.AddCommand(deleteCmd)
-	deleteCmd.Flags().BoolVarP(&forceDelete, "force", "f", false, "Skip confirmation prompt")
+var serverDeleteCmd = &cobra.Command{
+	Use:     "delete <server-id>",
+	Aliases: []string{"rm", "remove"},
+	Short:   "Delete a server",
+	Args:    cobra.ExactArgs(1),
+	RunE:    runServerDelete,
 }
 
-func runDelete(cmd *cobra.Command, args []string) error {
+func init() {
+	serverCmd.AddCommand(serverDeleteCmd)
+	serverDeleteCmd.Flags().BoolVarP(&forceDelete, "force", "f", false, "Skip confirmation prompt")
+}
+
+func runServerDelete(cmd *cobra.Command, args []string) error {
 	serverID, err := strconv.Atoi(args[0])
 	if err != nil {
 		return fmt.Errorf("invalid server ID: %s", args[0])

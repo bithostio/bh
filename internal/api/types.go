@@ -12,19 +12,19 @@ type BalanceResponse struct {
 
 // Server represents a server resource
 type Server struct {
-	ID                 int      `json:"id"`
-	Name               string   `json:"name"`
-	Pending            bool     `json:"pending"`
-	Power              string   `json:"power"`
-	CostSoFar          float64  `json:"cost_so_far"`
-	Status             int      `json:"status"`
-	BackupsEnabled     bool     `json:"backups_enabled"`
-	Message            *string  `json:"message"`
-	IPAddress          string   `json:"ip_address"`
-	PrivateIPAddress   string   `json:"private_ip_address"`
-	IPAddressV6        string   `json:"ip_address_v6"`
-	PrivateIPAddressV6 string   `json:"private_ip_address_v6"`
-	ProviderID         int      `json:"provider_id"`
+	ID                 int     `json:"id"`
+	Name               string  `json:"name"`
+	Pending            bool    `json:"pending"`
+	Power              string  `json:"power"`
+	CostSoFar          float64 `json:"cost_so_far"`
+	Status             int     `json:"status"`
+	BackupsEnabled     bool    `json:"backups_enabled"`
+	Message            *string `json:"message"`
+	IPAddress          string  `json:"ip_address"`
+	PrivateIPAddress   string  `json:"private_ip_address"`
+	IPAddressV6        string  `json:"ip_address_v6"`
+	PrivateIPAddressV6 string  `json:"private_ip_address_v6"`
+	ProviderID         int     `json:"provider_id"`
 }
 
 // Provider represents a cloud provider
@@ -86,6 +86,13 @@ type CreateServerRequest struct {
 	Terms          bool   `json:"terms"`
 }
 
+// CreateSSHKeyRequest represents the request to create an SSH key
+type CreateSSHKeyRequest struct {
+	Label      string `json:"label"`
+	Key        string `json:"key"`
+	ProviderID int    `json:"provider_id,omitempty"`
+}
+
 // Response wrappers for API responses
 type ServersResponse struct {
 	Servers []Server `json:"servers"`
@@ -113,4 +120,8 @@ type ImagesResponse struct {
 
 type KeysResponse struct {
 	Keys []SSHKey `json:"keys"`
+}
+
+type KeyResponse struct {
+	Key SSHKey `json:"key"`
 }

@@ -13,17 +13,51 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var createCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create a new server (interactive wizard)",
-	RunE:  runCreate,
+var (
+	interactive    bool
+	serverName     string
+	providerID     int
+	regionID       int
+	sizeID         int
+	imageID        int
+	sshKeyIDs      []int
+	backupsEnabled bool
+)
+
+var serverNewCmd = &cobra.Command{
+	Use:   "new",
+	Short: "Create a new server",
+	Long: `Create a new server either interactively or with command-line flags.
+
+Interactive mode (wizard):
+  bh server new --interactive
+
+Programmatic mode (with flags):
+  bh server new --name myserver --provider 1 --region 2 --size 5 --image 10 --keys 1,2
+
+List available resources:
+  bh providers
+  bh regions --provider 1
+  bh sizes --provider 1 --region 2
+  bh images --provider 1
+  bh ssh-keys`,
+	RunE: runServerNew,
 }
 
 func init() {
-	rootCmd.AddCommand(createCmd)
+	serverCmd.AddCommand(serverNewCmd)
+
+	serverNewCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactive wizard mode")
+	serverNewCmd.Flags().StringVarP(&serverName, "name", "n", "", "Server name")
+	serverNewCmd.Flags().IntVarP(&providerID, "provider", "p", 0, "Provider ID")
+	serverNewCmd.Flags().IntVarP(&regionID, "region", "r", 0, "Region ID")
+	serverNewCmd.Flags().IntVarP(&sizeID, "size", "s", 0, "Size/plan ID")
+	serverNewCmd.Flags().IntVarP(&imageID, "image", "m", 0, "Image/OS ID")
+	serverNewCmd.Flags().IntSliceVarP(&sshKeyIDs, "keys", "k", []int{}, "SSH key IDs (comma-separated)")
+	serverNewCmd.Flags().BoolVarP(&backupsEnabled, "backups", "b", false, "Enable automatic backups")
 }
 
-func runCreate(cmd *cobra.Command, args []string) error {
+func runServerNew(cmd *cobra.Command, args []string) error {
 	cfg, err := config.Load()
 	if err != nil {
 		return err
@@ -31,6 +65,66 @@ func runCreate(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
+	// Interactive mode
+	if interactive {
+		return runInteractiveServerCreation(client)
+	}
+
+	// Programmatic mode - validate required flags
+	if serverName == "" {
+		return fmt.Errorf("--name is required (or use --interactive)")
+	}
+	if providerID == 0 {
+		return fmt.Errorf("--provider is required (or use --interactive)")
+	}
+	if regionID == 0 {
+		return fmt.Errorf("--region is required (or use --interactive)")
+	}
+	if sizeID == 0 {
+		return fmt.Errorf("--size is required (or use --interactive)")
+	}
+	if imageID == 0 {
+		return fmt.Errorf("--image is required (or use --interactive)")
+	}
+	if len(sshKeyIDs) == 0 {
+		return fmt.Errorf("--keys is required (or use --interactive)")
+	}
+
+	// Create server with provided flags
+	return createServer(client, serverName, providerID, regionID, sizeID, imageID, sshKeyIDs, backupsEnabled)
+}
+
+func createServer(client *api.Client, name string, providerID, regionID, sizeID, imageID int, keyIDs []int, backups bool) error {
+	stop := ui.ShowProgress("Creating server...")
+
+	req := &api.CreateServerRequest{
+		Name:           name,
+		SizeID:         sizeID,
+		RegionID:       regionID,
+		ImageID:        imageID,
+		ProviderID:     providerID,
+		KeyIDs:         keyIDs,
+		BackupsEnabled: backups,
+		Terms:          true,
+	}
+
+	server, err := client.CreateServer(req)
+	stop()
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("\n%s Server created successfully!\n\n", ui.Green("✓"))
+	fmt.Printf("  ID:     %d\n", server.ID)
+	fmt.Printf("  Name:   %s\n", server.Name)
+	fmt.Printf("  Status: %s\n", ui.Yellow("Pending"))
+	fmt.Printf("\nYour server is being provisioned. Run 'bh server list' to check status.\n")
+
+	return nil
+}
+
+func runInteractiveServerCreation(client *api.Client) error {
 	fmt.Println(ui.Header("Bithost Server Creation Wizard"))
 	fmt.Println(ui.Divider(50))
 
@@ -91,7 +185,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 
 	// Step 6: Enable Backups
 	fmt.Println("\n" + ui.StepHeader(6, "Backups"))
-	backupsEnabled, err := promptBackups()
+	backups, err := promptBackups()
 	if err != nil {
 		return err
 	}
@@ -99,13 +193,13 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	// Step 7: Server Name
 	fmt.Println("\n" + ui.StepHeader(7, "Server Name"))
 	defaultName := fmt.Sprintf("server-%d", time.Now().Unix())
-	serverName, err := promptServerName(defaultName)
+	name, err := promptServerName(defaultName)
 	if err != nil {
 		return err
 	}
 
 	// Summary
-	summary := buildSummary(serverName, provider, region, size, image, backupsEnabled, len(selectedKeyIDs))
+	summary := buildSummary(name, provider, region, size, image, backups, len(selectedKeyIDs))
 	confirmed, err := confirmCreation(summary)
 	if err != nil {
 		return err
@@ -115,34 +209,7 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	// Create server
-	stop := ui.ShowProgress("Creating server...")
-
-	req := &api.CreateServerRequest{
-		Name:           serverName,
-		SizeID:         size.ID,
-		RegionID:       region.ID,
-		ImageID:        image.ID,
-		ProviderID:     provider.ID,
-		KeyIDs:         selectedKeyIDs,
-		BackupsEnabled: backupsEnabled,
-		Terms:          true, // Auto-accept terms
-	}
-
-	server, err := client.CreateServer(req)
-	stop()
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("\n%s Server created successfully!\n\n", ui.Green("✓"))
-	fmt.Printf("  ID:     %d\n", server.ID)
-	fmt.Printf("  Name:   %s\n", server.Name)
-	fmt.Printf("  Status: %s\n", ui.Yellow("Pending"))
-	fmt.Printf("\nYour server is being provisioned. Run 'bh servers' to check status.\n")
-
-	return nil
+	return createServer(client, name, provider.ID, region.ID, size.ID, image.ID, selectedKeyIDs, backups)
 }
 
 func promptProvider(providers []api.Provider) (*api.Provider, error) {

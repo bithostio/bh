@@ -10,18 +10,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var serversCmd = &cobra.Command{
-	Use:     "servers",
-	Aliases: []string{"ls", "list"},
-	Short:   "List all your servers",
-	RunE:    runServers,
+var serverListCmd = &cobra.Command{
+	Use:     "list",
+	Aliases: []string{"ls"},
+	Short:   "List all servers",
+	RunE:    runServerList,
 }
 
 func init() {
-	rootCmd.AddCommand(serversCmd)
+	serverCmd.AddCommand(serverListCmd)
 }
 
-func runServers(cmd *cobra.Command, args []string) error {
+func runServerList(cmd *cobra.Command, args []string) error {
 	cfg, err := config.Load()
 	if err != nil {
 		return err
@@ -35,7 +35,6 @@ func runServers(cmd *cobra.Command, args []string) error {
 	}
 
 	displayServers(servers)
-
 	return nil
 }
 

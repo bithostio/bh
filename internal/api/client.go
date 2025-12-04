@@ -84,6 +84,22 @@ func (c *Client) ListSSHKeys() ([]SSHKey, error) {
 	return resp.Keys, err
 }
 
+// CreateSSHKey creates a new SSH key
+func (c *Client) CreateSSHKey(req *CreateSSHKeyRequest) (*SSHKey, error) {
+	// Wrap the request in a "key" object as expected by Rails
+	wrappedReq := map[string]interface{}{
+		"key": map[string]interface{}{
+			"label": req.Label,
+			"key":   req.Key,
+		},
+		"provider_id": req.ProviderID,
+	}
+
+	var resp KeyResponse
+	err := c.do("POST", "/keys", wrappedReq, &resp)
+	return &resp.Key, err
+}
+
 // GetBalance retrieves the current account balance
 func (c *Client) GetBalance() (float64, error) {
 	var resp BalanceResponse
