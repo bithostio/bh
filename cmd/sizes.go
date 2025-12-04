@@ -55,9 +55,9 @@ func runSizes(cmd *cobra.Command, args []string) error {
 		rows = append(rows, []string{
 			strconv.Itoa(size.ID),
 			size.Name,
-			fmt.Sprintf("%d MB", size.Memory),
+			fmt.Sprintf("%s MB", size.Memory),
 			size.Processor,
-			fmt.Sprintf("%d GB", size.Disk),
+			fmt.Sprintf("%s GB", size.Disk),
 			ui.FormatMoney(size.Price),
 		})
 	}

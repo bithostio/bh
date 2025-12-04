@@ -403,7 +403,7 @@ func buildSummary(name string, provider *api.Provider, region *api.Region, size 
 	sb.WriteString(fmt.Sprintf("  %-15s %s\n", "Name:", name))
 	sb.WriteString(fmt.Sprintf("  %-15s %s\n", "Provider:", provider.Name))
 	sb.WriteString(fmt.Sprintf("  %-15s %s\n", "Region:", region.Name))
-	sb.WriteString(fmt.Sprintf("  %-15s %s (%dMB RAM, %s)\n", "Size:", size.Name, size.Memory, size.Processor))
+	sb.WriteString(fmt.Sprintf("  %-15s %s (%sMB RAM, %s)\n", "Size:", size.Name, size.Memory, size.Processor))
 	sb.WriteString(fmt.Sprintf("  %-15s %s\n", "OS:", image.Name))
 	sb.WriteString(fmt.Sprintf("  %-15s %d selected\n", "SSH Keys:", keyCount))
 	sb.WriteString(fmt.Sprintf("  %-15s %s\n", "Backups:", ui.FormatEnabled(backups)))
