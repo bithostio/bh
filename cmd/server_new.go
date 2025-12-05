@@ -95,7 +95,7 @@ func runServerNew(cmd *cobra.Command, args []string) error {
 }
 
 func createServer(client *api.Client, name string, providerID, regionID, sizeID, imageID int, keyIDs []int, backups bool) error {
-	stop := ui.ShowProgress("Creating server...")
+	stop, cancel := ui.ShowProgress("Creating server...")
 
 	req := &api.CreateServerRequest{
 		Name:           name,
@@ -109,11 +109,13 @@ func createServer(client *api.Client, name string, providerID, regionID, sizeID,
 	}
 
 	server, err := client.CreateServer(req)
-	stop()
 
 	if err != nil {
+		cancel() // Clear spinner without checkmark
 		return err
 	}
+
+	stop() // Stop spinner with success checkmark
 
 	fmt.Printf("\n%s Server created successfully!\n\n", ui.Green("✓"))
 	fmt.Printf("  ID:     %d\n", server.ID)

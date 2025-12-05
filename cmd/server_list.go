@@ -69,18 +69,18 @@ func displayServers(servers []api.Server) {
 
 func formatServerStatus(server api.Server) string {
 	if server.Pending {
-		return ui.Yellow("Pending")
+		return ui.Yellow("pending")
 	}
 
 	switch server.Status {
-	case 1: // Active
+	case "active":
 		if server.Power {
-			return ui.Green("Active")
+			return ui.Green("active")
 		}
-		return ui.Yellow("Powered Off")
-	case 2: // Failed
-		return ui.Red("Failed")
+		return ui.Yellow("powered off")
+	case "failed":
+		return ui.Red("failed")
 	default:
-		return fmt.Sprintf("Status %d", server.Status)
+		return server.Status
 	}
 }

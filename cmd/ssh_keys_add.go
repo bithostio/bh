@@ -114,7 +114,7 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create the key
-	stop := ui.ShowProgress("Adding SSH key...")
+	stop, cancel := ui.ShowProgress("Adding SSH key...")
 
 	req := &api.CreateSSHKeyRequest{
 		Label:      label,
@@ -123,11 +123,13 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 	}
 
 	key, err := client.CreateSSHKey(req)
-	stop()
 
 	if err != nil {
+		cancel()
 		return err
 	}
+
+	stop()
 
 	fmt.Printf("\n%s SSH key added successfully!\n\n", ui.Green("✓"))
 	fmt.Printf("  ID:    %d\n", key.ID)

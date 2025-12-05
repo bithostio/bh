@@ -57,13 +57,15 @@ func runServerDelete(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	stop := ui.ShowProgress(fmt.Sprintf("Deleting server %d...", serverID))
+	stop, cancel := ui.ShowProgress(fmt.Sprintf("Deleting server %d...", serverID))
 	err = client.DeleteServer(serverID)
-	stop()
 
 	if err != nil {
+		cancel()
 		return err
 	}
+
+	stop()
 
 	fmt.Printf("%s Server %d deleted successfully\n", ui.Green("✓"), serverID)
 

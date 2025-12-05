@@ -113,9 +113,10 @@ func FormatEnabled(enabled bool) string {
 }
 
 // ShowProgress displays a spinner with a message
-// Returns a function to call when done
-func ShowProgress(message string) func() {
+// Returns a stop function (shows checkmark) and cancel function (clears line)
+func ShowProgress(message string) (stop func(), cancel func()) {
 	done := make(chan bool)
+	clear := make(chan bool)
 
 	go func() {
 		frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
@@ -125,6 +126,9 @@ func ShowProgress(message string) func() {
 			case <-done:
 				fmt.Printf("\r%s %s\n", Green("✓"), message)
 				return
+			case <-clear:
+				fmt.Printf("\r\033[K") // Clear line
+				return
 			default:
 				fmt.Printf("\r%s %s", frames[i], message)
 				i = (i + 1) % len(frames)
@@ -133,8 +137,15 @@ func ShowProgress(message string) func() {
 		}
 	}()
 
-	return func() {
+	stopFn := func() {
 		done <- true
 		time.Sleep(200 * time.Millisecond)
 	}
+
+	cancelFn := func() {
+		clear <- true
+		time.Sleep(200 * time.Millisecond)
+	}
+
+	return stopFn, cancelFn
 }
