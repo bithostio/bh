@@ -15,7 +15,7 @@ type Server struct {
 	ID                 int     `json:"id"`
 	Name               string  `json:"name"`
 	Pending            bool    `json:"pending"`
-	Power              string  `json:"power"`
+	Power              bool    `json:"power"`
 	CostSoFar          float64 `json:"cost_so_far"`
 	Status             int     `json:"status"`
 	BackupsEnabled     bool    `json:"backups_enabled"`
@@ -53,7 +53,7 @@ type Size struct {
 	WindowsFee   float64 `json:"windows_fee"`
 	Memory       string  `json:"memory"`
 	Processor    string  `json:"processor"`
-	Bandwidth    int     `json:"bandwidth"`
+	Bandwidth    string  `json:"bandwidth"`
 	Disk         string  `json:"disk"`
 	Kind         string  `json:"kind"`
 }

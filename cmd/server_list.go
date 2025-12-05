@@ -74,7 +74,7 @@ func formatServerStatus(server api.Server) string {
 
 	switch server.Status {
 	case 1: // Active
-		if server.Power == "on" {
+		if server.Power {
 			return ui.Green("Active")
 		}
 		return ui.Yellow("Powered Off")
