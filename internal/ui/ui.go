@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -43,8 +44,10 @@ func calculateWidths(rows [][]string) []int {
 	widths := make([]int, len(rows[0]))
 	for _, row := range rows {
 		for i, col := range row {
-			if i < len(widths) && len(col) > widths[i] {
-				widths[i] = len(col)
+			// Strip ANSI codes to get actual display width
+			visibleLen := len(stripAnsi(col))
+			if i < len(widths) && visibleLen > widths[i] {
+				widths[i] = visibleLen
 			}
 		}
 	}
@@ -57,7 +60,14 @@ func printRow(row []string, widths []int, header bool) {
 		if i >= len(widths) {
 			break
 		}
-		padded := fmt.Sprintf("%-*s", widths[i], col)
+		// Calculate padding based on visible length (without ANSI codes)
+		visibleLen := len(stripAnsi(col))
+		padding := widths[i] - visibleLen
+		if padding < 0 {
+			padding = 0
+		}
+		padded := col + strings.Repeat(" ", padding)
+
 		if header {
 			parts = append(parts, Bold(padded))
 		} else {
@@ -148,4 +158,12 @@ func ShowProgress(message string) (stop func(), cancel func()) {
 	}
 
 	return stopFn, cancelFn
+}
+
+// ansiRegex matches ANSI escape codes
+var ansiRegex = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
+// stripAnsi removes ANSI escape codes from a string
+func stripAnsi(s string) string {
+	return ansiRegex.ReplaceAllString(s, "")
 }
