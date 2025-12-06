@@ -87,8 +87,8 @@ func (c *Client) ListSSHKeys() ([]SSHKey, error) {
 // CreateSSHKey creates a new SSH key
 func (c *Client) CreateSSHKey(req *CreateSSHKeyRequest) (*SSHKey, error) {
 	// Wrap the request in a "key" object as expected by Rails
-	wrappedReq := map[string]interface{}{
-		"key": map[string]interface{}{
+	wrappedReq := map[string]any{
+		"key": map[string]any{
 			"label": req.Label,
 			"key":   req.Key,
 		},
@@ -108,7 +108,7 @@ func (c *Client) GetBalance() (float64, error) {
 }
 
 // do performs an HTTP request with authentication
-func (c *Client) do(method, path string, body interface{}, result interface{}) error {
+func (c *Client) do(method, path string, body any, result any) error {
 	var bodyReader io.Reader
 	if body != nil {
 		jsonData, err := json.Marshal(body)

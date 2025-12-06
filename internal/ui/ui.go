@@ -62,10 +62,7 @@ func printRow(row []string, widths []int, header bool) {
 		}
 		// Calculate padding based on visible length (without ANSI codes)
 		visibleLen := len(stripAnsi(col))
-		padding := widths[i] - visibleLen
-		if padding < 0 {
-			padding = 0
-		}
+		padding := max(widths[i]-visibleLen, 0)
 		padded := col + strings.Repeat(" ", padding)
 
 		if header {

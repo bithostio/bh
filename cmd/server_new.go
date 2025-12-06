@@ -334,7 +334,7 @@ func promptSSHKeys(keys []api.SSHKey) ([]int, error) {
 	}
 
 	var selectedIDs []int
-	for _, s := range strings.Split(result, ",") {
+	for s := range strings.SplitSeq(result, ",") {
 		s = strings.TrimSpace(s)
 		idx, err := strconv.Atoi(s)
 		if err != nil || idx < 1 || idx > len(keys) {
