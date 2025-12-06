@@ -5,7 +5,7 @@ import (
 )
 
 var serverCmd = &cobra.Command{
-	Use:   "server",
+	Use:   "servers",
 	Short: "Manage servers",
 	Long:  `Create, list, and delete servers.`,
 }

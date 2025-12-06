@@ -30,10 +30,10 @@ var serverNewCmd = &cobra.Command{
 	Long: `Create a new server either interactively or with command-line flags.
 
 Interactive mode (wizard):
-  bh server new --interactive
+  bh servers new --interactive
 
 Programmatic mode (with flags):
-  bh server new --name myserver --provider 1 --region 2 --size 5 --image 10 --keys 1,2
+  bh servers new --name myserver --provider 1 --region 2 --size 5 --image 10 --keys 1,2
 
 List available resources:
   bh providers
@@ -121,7 +121,7 @@ func createServer(client *api.Client, name string, providerID, regionID, sizeID,
 	fmt.Printf("  ID:     %d\n", server.ID)
 	fmt.Printf("  Name:   %s\n", server.Name)
 	fmt.Printf("  Status: %s\n", ui.Yellow("Pending"))
-	fmt.Printf("\nYour server is being provisioned. Run 'bh server list' to check status.\n")
+	fmt.Printf("\nYour server is being provisioned. Run 'bh servers list' to check status.\n")
 
 	return nil
 }
