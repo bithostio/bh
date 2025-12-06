@@ -19,7 +19,7 @@ type Server struct {
 	CostSoFar          float64 `json:"cost_so_far"`
 	Status             string  `json:"status"`
 	BackupsEnabled     bool    `json:"backups_enabled"`
-	Message            *string `json:"message"`
+	Message            string  `json:"message"`
 	IPAddress          string  `json:"ip_address"`
 	PrivateIPAddress   string  `json:"private_ip_address"`
 	IPAddressV6        string  `json:"ip_address_v6"`
