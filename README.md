@@ -1,172 +1,139 @@
-# bh - bithost.io CLI
+# bh - Bithost.io CLI
 
-Official command-line interface for bithost.io.
+Official command-line interface for Bithost.io.
 
 ## Installation
 
-### From Source
-
 ```bash
+# From source
 git clone https://github.com/bithostio/bh.git
 cd bh
-go build -o bh .
+make build
 sudo mv bh /usr/local/bin/
-```
 
-### Using Go Install
-
-```bash
+# Or using go install
 go install github.com/bithostio/bh@latest
 ```
 
 ## Quick Start
 
-### 1. Get Your API Key
-
-Get your API key from [https://dashboard.bithost.io/api_keys](https://dashboard.bithost.io/api_keys)
-
-### 2. Configure Authentication
-
 ```bash
+# 1. Configure authentication
 bh auth
-```
 
-Enter your API key when prompted.
-
-### 3. Check Your Balance
-
-```bash
+# 2. Check balance
 bh balance
+
+# 3. Create a server (interactive wizard)
+bh servers new --interactive
 ```
 
-### 4. Create a Server
-
-```bash
-bh create
-```
-
-Follow the interactive wizard to create a new server.
+Get your API key from [dashboard.bithost.io/api_keys](https://dashboard.bithost.io/api_keys)
 
 ## Commands
 
-### Authentication
+### Server Management
 
 ```bash
-bh auth
+# List all servers
+bh servers list
+
+# Create a server (interactive wizard)
+bh servers new --interactive
+
+# Create a server (with flags)
+bh servers new --name myserver --provider 1 --region 2 --size 5 --image 10 --keys 1,2
+
+# Delete a server
+bh servers delete <id>
+bh servers delete <id> --force  # skip confirmation
 ```
 
-Configure your bithost.io API key. The key is stored securely in `~/.bh/config.json` with 0600 permissions.
-
-### Balance
+### Resource Listing
 
 ```bash
+# List providers
+bh providers
+
+# List regions for a provider
+bh regions --provider <provider-id>
+
+# List sizes/plans for a region
+bh sizes --provider <provider-id> --region <region-id>
+
+# List OS images
+bh images --provider <provider-id>
+bh images --provider <provider-id> --arch arm  # filter by architecture
+```
+
+### SSH Key Management
+
+```bash
+# List SSH keys
+bh ssh-keys list
+
+# Add SSH key (interactive)
+bh ssh-keys add
+
+# Add SSH key from file
+bh ssh-keys add --file ~/.ssh/id_rsa.pub --label "my-key" --provider 1
+
+# Add SSH key directly
+bh ssh-keys add --key "ssh-rsa AAAA..." --label "my-key" --provider 1
+```
+
+### Account
+
+```bash
+# Show balance
 bh balance
-```
 
-Display your current account balance. If your balance is below $5, you'll see a warning with a link to top up.
-
-### List Servers
-
-```bash
-bh servers
-# or
-bh ls
-# or
-bh list
-```
-
-Display a table of all your servers with their ID, name, status, IP address, cost, and provider.
-
-### Create Server
-
-```bash
-bh create
-```
-
-Launch an interactive wizard to create a new server. The wizard will guide you through:
-
-1. **Provider Selection** - Choose your cloud provider
-2. **Region Selection** - Select the geographic region
-3. **Size/Plan Selection** - Choose server specifications and pricing
-4. **Operating System** - Select your OS image
-5. **SSH Keys** - Select which SSH keys to add (can select multiple or all)
-6. **Backups** - Enable/disable automatic backups (+20% cost)
-7. **Server Name** - Choose a name for your server
-8. **Confirmation** - Review and confirm your configuration
-
-### Delete Server
-
-```bash
-bh delete <server-id>
-# or
-bh rm <server-id>
-```
-
-Delete a server by ID. You'll be prompted for confirmation unless you use the `-f` flag.
-
-**Skip confirmation:**
-```bash
-bh delete <server-id> -f
+# Configure API key
+bh auth
 ```
 
 ## Configuration
 
-### Config File
-
-Configuration is stored in `~/.bh/config.json`:
+Config is stored in `~/.bh/config.json` with 0600 permissions:
 
 ```json
 {
   "api_key": "your-api-key",
-  "api_base_url": "https://dashboard.bithost.io/api/v1"
+  "api_base_url": "https://dashboard.bithost.io/api/v1/"
 }
 ```
 
-### Environment Variables
-
-You can override the config file with environment variables:
-
-- `BH_API_KEY` - Override configured API key
-- `BH_API_URL` - Override API base URL (default: https://dashboard.bithost.io/api/v1)
-
-**Example:**
-
-```bash
-export BH_API_KEY="your-api-key"
-bh balance
-```
+Environment variables (optional overrides):
+- `BH_API_KEY` - API key
+- `BH_API_URL` - API base URL
 
 ## Troubleshooting
 
-### "config not found" error
+**"config not found"** - Run `bh auth`
 
-Run `bh auth` to configure your API key.
+**"Authentication failed"** - Get a new API key from [dashboard.bithost.io/api_keys](https://dashboard.bithost.io/api_keys)
 
-### "Authentication failed" error
+**"No SSH keys found"** - Add keys with `bh ssh-keys add` or at [dashboard.bithost.io/keys](https://dashboard.bithost.io/keys)
 
-Your API key may be invalid or expired. API keys are valid for 3 months by default.
-Get a new key from [https://dashboard.bithost.io/api_keys](https://dashboard.bithost.io/api_keys) and run `bh auth` again.
-
-### "No SSH keys found" error
-
-You need to add at least one SSH key before creating servers. Add keys at [https://dashboard.bithost.io/keys](https://dashboard.bithost.io/keys).
-
-### Low balance warning
-
-If your balance is below $5, you'll see a warning. Top up at [https://dashboard.bithost.io/billing](https://dashboard.bithost.io/billing).
+**Low balance** - Top up at [dashboard.bithost.io/billing](https://dashboard.bithost.io/billing)
 
 ## Development
 
-### Building
-
 ```bash
-go build -o bh .
-```
+# Build
+make build
 
-### Running Tests
+# Build for all platforms
+make build-all
 
-```bash
-go test ./...
+# Run tests
+make test
+
+# Format code
+make fmt
+
+# Run modernize
+make modernize
 ```
 
 ## License
