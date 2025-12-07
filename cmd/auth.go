@@ -47,7 +47,6 @@ func runAuth(cmd *cobra.Command, args []string) error {
 		cfg = config.New()
 	}
 
-	// Update only the API key
 	cfg.APIKey = apiKey
 
 	if err := config.Save(cfg); err != nil {

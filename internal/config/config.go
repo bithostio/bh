@@ -61,7 +61,6 @@ func Load() (*Config, error) {
 		cfg.BaseURL = getBaseURL()
 	}
 
-	// Ensure BaseURL always ends with a slash
 	cfg.BaseURL = ensureTrailingSlash(cfg.BaseURL)
 
 	return &cfg, nil
@@ -74,7 +73,6 @@ func Save(cfg *Config) error {
 		return err
 	}
 
-	// Create directory if it doesn't exist
 	if err := os.MkdirAll(filepath.Dir(configPath), 0700); err != nil {
 		return err
 	}

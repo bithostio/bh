@@ -53,7 +53,6 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	// Determine label
 	label := keyLabel
 	if label == "" {
 		prompt := promptui.Prompt{
@@ -71,7 +70,6 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Determine key content
 	var publicKey string
 	if keyContent != "" {
 		publicKey = keyContent
@@ -82,7 +80,6 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 		}
 		publicKey = strings.TrimSpace(string(data))
 	} else {
-		// Interactive: prompt for file path
 		prompt := promptui.Prompt{
 			Label:   "Path to SSH public key file",
 			Default: "~/.ssh/id_rsa.pub",
@@ -92,7 +89,6 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		// Expand ~ to home directory
 		if strings.HasPrefix(path, "~/") {
 			home, err := os.UserHomeDir()
 			if err != nil {
@@ -108,12 +104,10 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 		publicKey = strings.TrimSpace(string(data))
 	}
 
-	// Validate key is not empty
 	if publicKey == "" {
 		return fmt.Errorf("SSH key content is empty")
 	}
 
-	// Create the key
 	stop, cancel := ui.ShowProgress("Adding SSH key...")
 
 	req := &api.CreateSSHKeyRequest{

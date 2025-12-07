@@ -79,7 +79,7 @@ func printDivider(widths []int) {
 	for _, w := range widths {
 		total += w
 	}
-	total += (len(widths) - 1) * 2 // spacing
+	total += (len(widths) - 1) * 2
 	fmt.Println(strings.Repeat("─", total))
 }
 

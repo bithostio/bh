@@ -17,8 +17,8 @@ var rootCmd = &cobra.Command{
   - List and delete servers
 
 Get started by running: bh auth`,
-	SilenceErrors: true, // We handle errors ourselves
-	SilenceUsage:  true, // Don't show usage on errors
+	SilenceErrors: true,
+	SilenceUsage:  true,
 }
 
 func Execute() {

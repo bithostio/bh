@@ -65,12 +65,10 @@ func runServerNew(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	// Interactive mode
 	if interactive {
 		return runInteractiveServerCreation(client)
 	}
 
-	// Programmatic mode - validate required flags
 	if serverName == "" {
 		return fmt.Errorf("--name is required (or use --interactive)")
 	}
@@ -90,7 +88,6 @@ func runServerNew(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("--keys is required (or use --interactive)")
 	}
 
-	// Create server with provided flags
 	return createServer(client, serverName, providerID, regionID, sizeID, imageID, sshKeyIDs, backupsEnabled)
 }
 

@@ -38,7 +38,7 @@ func runBalance(cmd *cobra.Command, args []string) error {
 }
 
 func displayBalance(balance float64) {
-	threshold := 5.0 // Low balance threshold
+	threshold := 5.0
 
 	bold := color.New(color.Bold).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
