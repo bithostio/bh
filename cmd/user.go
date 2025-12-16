@@ -9,17 +9,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var balanceCmd = &cobra.Command{
-	Use:   "balance",
-	Short: "Show your account balance",
-	RunE:  runBalance,
+var userCmd = &cobra.Command{
+	Use:   "user",
+	Short: "Show your user information",
+	RunE:  runUser,
 }
 
 func init() {
-	rootCmd.AddCommand(balanceCmd)
+	rootCmd.AddCommand(userCmd)
 }
 
-func runBalance(cmd *cobra.Command, args []string) error {
+func runUser(cmd *cobra.Command, args []string) error {
 	cfg, err := config.Load()
 	if err != nil {
 		return err
@@ -27,26 +27,28 @@ func runBalance(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	balance, err := client.GetBalance()
+	user, err := client.GetUser()
 	if err != nil {
 		return err
 	}
 
-	displayBalance(balance)
+	displayUser(user)
 
 	return nil
 }
 
-func displayBalance(balance float64) {
+func displayUser(user *api.UserResponse) {
 	threshold := 5.0
 
 	bold := color.New(color.Bold).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
 	cyan := color.New(color.FgCyan).SprintFunc()
 
-	fmt.Printf("\nCurrent Balance: %s\n", bold(fmt.Sprintf("$%.2f", balance)))
+	fmt.Printf("\nAccount: %s (%s)\n", bold(user.FullName), user.Email)
+	fmt.Printf("Balance: %s\n", bold(fmt.Sprintf("$%.2f", user.Balance)))
+	fmt.Printf("Server Limit: %s\n", bold(fmt.Sprintf("%d", user.ServerLimit)))
 
-	if balance < threshold {
+	if user.Balance < threshold {
 		fmt.Printf("\n%s Your balance is low!\n", yellow("Warning:"))
 		fmt.Printf("Top up at: %s\n\n", cyan("https://dashboard.bithost.io/billing"))
 	} else {

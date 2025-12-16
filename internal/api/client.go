@@ -100,11 +100,11 @@ func (c *Client) CreateSSHKey(req *CreateSSHKeyRequest) (*SSHKey, error) {
 	return &resp.Key, err
 }
 
-// GetBalance retrieves the current account balance
-func (c *Client) GetBalance() (float64, error) {
-	var resp BalanceResponse
-	err := c.do("GET", "balance", nil, &resp)
-	return resp.Balance, err
+// GetUser retrieves the user information including balance and server limit
+func (c *Client) GetUser() (*UserResponse, error) {
+	var resp UserResponse
+	err := c.do("GET", "user", nil, &resp)
+	return &resp, err
 }
 
 // do performs an HTTP request with authentication

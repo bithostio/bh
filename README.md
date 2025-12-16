@@ -21,8 +21,8 @@ go install github.com/bithostio/bh@latest
 # 1. Configure authentication
 bh auth
 
-# 2. Check balance
-bh balance
+# 2. View user information
+bh user
 
 # 3. Create a server (interactive wizard)
 bh servers new --interactive
@@ -85,8 +85,8 @@ bh ssh-keys add --key "ssh-rsa AAAA..." --label "my-key" --provider 1
 ### Account
 
 ```bash
-# Show balance
-bh balance
+# Show user information (name, email, balance, server limit)
+bh user
 
 # Configure API key
 bh auth

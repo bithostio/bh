@@ -5,9 +5,12 @@ type ErrorResponse struct {
 	Errors []string `json:"errors"`
 }
 
-// BalanceResponse represents the balance response
-type BalanceResponse struct {
-	Balance float64 `json:"balance"`
+// UserResponse represents the user information response
+type UserResponse struct {
+	FullName    string  `json:"full_name"`
+	Email       string  `json:"email"`
+	Balance     float64 `json:"balance"`
+	ServerLimit int     `json:"server_limit"`
 }
 
 // Server represents a server resource
