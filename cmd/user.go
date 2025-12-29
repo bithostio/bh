@@ -50,7 +50,7 @@ func displayUser(user *api.UserResponse) {
 
 	if user.Balance < threshold {
 		fmt.Printf("\n%s Your balance is low!\n", yellow("Warning:"))
-		fmt.Printf("Top up at: %s\n\n", cyan("https://dashboard.bithost.io/billing"))
+		fmt.Printf("Top up at: %s\n\n", cyan("https://dashboard.bithost.io"))
 	} else {
 		fmt.Println()
 	}
