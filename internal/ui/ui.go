@@ -112,6 +112,36 @@ func FormatMoney(amount float64) string {
 	return fmt.Sprintf("$%.2f", amount)
 }
 
+// FormatMemory formats memory value, appending "MB" if no unit is specified
+func FormatMemory(value string) string {
+	// Check if already has a unit (MB, GB, TB, etc.)
+	if hasUnit(value) {
+		return value
+	}
+	return value + " MB"
+}
+
+// FormatStorage formats storage value, appending "GB" if no unit is specified
+func FormatStorage(value string) string {
+	// Check if already has a unit (MB, GB, TB, etc.)
+	if hasUnit(value) {
+		return value
+	}
+	return value + " GB"
+}
+
+// hasUnit checks if a string already has a unit suffix (MB, GB, TB, PB, etc.)
+func hasUnit(value string) bool {
+	value = strings.ToUpper(strings.TrimSpace(value))
+	units := []string{"B", "KB", "MB", "GB", "TB", "PB"}
+	for _, unit := range units {
+		if strings.HasSuffix(value, unit) {
+			return true
+		}
+	}
+	return false
+}
+
 // FormatEnabled returns colored "Enabled" or "Disabled"
 func FormatEnabled(enabled bool) string {
 	if enabled {
