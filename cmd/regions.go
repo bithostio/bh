@@ -60,7 +60,7 @@ func runRegions(cmd *cobra.Command, args []string) error {
 	}
 
 	ui.PrintTable(rows)
-	ui.DisplayPagination(resp.Meta.Pagination.Page, resp.Meta.Pagination.HasPreviousPage, resp.Meta.Pagination.HasNextPage)
+	ui.DisplayPagination(resp.Meta.Pagination)
 
 	return nil
 }

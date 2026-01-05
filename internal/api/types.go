@@ -12,6 +12,11 @@ type Pagination struct {
 	HasNextPage     bool `json:"has_next_page"`
 }
 
+// Implement ui.Paginator interface
+func (p Pagination) GetPage() int      { return p.Page }
+func (p Pagination) HasPrevious() bool { return p.HasPreviousPage }
+func (p Pagination) HasNext() bool     { return p.HasNextPage }
+
 // Meta represents response metadata
 type Meta struct {
 	Pagination Pagination `json:"pagination"`

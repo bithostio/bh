@@ -196,43 +196,36 @@ func stripAnsi(s string) string {
 	return ansiRegex.ReplaceAllString(s, "")
 }
 
-// Pagination represents pagination metadata
-type Pagination struct {
-	Page            int
-	HasPreviousPage bool
-	HasNextPage     bool
+// Paginator provides pagination information
+type Paginator interface {
+	GetPage() int
+	HasPrevious() bool
+	HasNext() bool
 }
 
 // DisplayPagination shows pagination information if metadata is available
-func DisplayPagination(page int, hasPrev, hasNext bool) {
+func DisplayPagination(p Paginator) {
 	// Don't show pagination info if we're on page 1 and there's no next page
-	if page == 1 && !hasNext {
+	if p.GetPage() == 1 && !p.HasNext() {
 		return
 	}
 
 	fmt.Println()
 
 	// Show current page
-	fmt.Printf("Page %d", page)
+	fmt.Printf("Page %d", p.GetPage())
 
 	// Show navigation hints
 	var hints []string
-	if hasPrev {
-		hints = append(hints, Gray(fmt.Sprintf("--page %d for previous", page-1)))
+	if p.HasPrevious() {
+		hints = append(hints, Gray(fmt.Sprintf("--page %d for previous", p.GetPage()-1)))
 	}
-	if hasNext {
-		hints = append(hints, Gray(fmt.Sprintf("--page %d for next", page+1)))
+	if p.HasNext() {
+		hints = append(hints, Gray(fmt.Sprintf("--page %d for next", p.GetPage()+1)))
 	}
 
 	if len(hints) > 0 {
-		fmt.Print(" (")
-		for i, hint := range hints {
-			if i > 0 {
-				fmt.Print(", ")
-			}
-			fmt.Print(hint)
-		}
-		fmt.Print(")")
+		fmt.Printf(" (%s)", strings.Join(hints, ", "))
 	}
 
 	fmt.Println()
