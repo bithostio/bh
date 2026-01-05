@@ -54,10 +54,10 @@ type Size struct {
 	Price        float64 `json:"price"`
 	PricePerHour string  `json:"price_per_hour"`
 	WindowsFee   float64 `json:"windows_fee"`
-	Memory       string  `json:"memory"`
+	Memory       int     `json:"memory"`
 	Processor    string  `json:"processor"`
-	Bandwidth    string  `json:"bandwidth"`
-	Disk         string  `json:"disk"`
+	Bandwidth    int     `json:"bandwidth"`
+	Disk         int     `json:"disk"`
 	Kind         string  `json:"kind"`
 }
 
@@ -66,7 +66,7 @@ type Image struct {
 	ID           int    `json:"id"`
 	Name         string `json:"name"`
 	Distribution string `json:"distribution"`
-	Windows      int    `json:"windows"`
+	Windows      bool   `json:"windows"`
 	Architecture string `json:"architecture"`
 }
 
