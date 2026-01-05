@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var sshKeysListPage int
+
 var sshKeysListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
@@ -19,6 +21,7 @@ var sshKeysListCmd = &cobra.Command{
 
 func init() {
 	sshKeysCmd.AddCommand(sshKeysListCmd)
+	sshKeysListCmd.Flags().IntVar(&sshKeysListPage, "page", 0, "Page number (optional)")
 }
 
 func runSSHKeysList(cmd *cobra.Command, args []string) error {
@@ -29,12 +32,12 @@ func runSSHKeysList(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	keys, err := client.ListSSHKeys()
+	resp, err := client.ListSSHKeys(sshKeysListPage)
 	if err != nil {
 		return err
 	}
 
-	if len(keys) == 0 {
+	if len(resp.Keys) == 0 {
 		fmt.Println("No SSH keys found.")
 		fmt.Println("\nAdd a key with: bh ssh-keys add")
 		return nil
@@ -44,7 +47,7 @@ func runSSHKeysList(cmd *cobra.Command, args []string) error {
 		{"ID", "Label", "Fingerprint"},
 	}
 
-	for _, key := range keys {
+	for _, key := range resp.Keys {
 		fingerprint := key.Key
 		if len(fingerprint) > 50 {
 			fingerprint = fingerprint[:47] + "..."
@@ -58,6 +61,7 @@ func runSSHKeysList(cmd *cobra.Command, args []string) error {
 	}
 
 	ui.PrintTable(rows)
+	ui.DisplayPagination(resp.Meta.Pagination.Page, resp.Meta.Pagination.HasPreviousPage, resp.Meta.Pagination.HasNextPage)
 
 	return nil
 }

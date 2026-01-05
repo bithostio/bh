@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var serverListPage int
+
 var serverListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
@@ -19,6 +21,7 @@ var serverListCmd = &cobra.Command{
 
 func init() {
 	serverCmd.AddCommand(serverListCmd)
+	serverListCmd.Flags().IntVar(&serverListPage, "page", 0, "Page number (optional)")
 }
 
 func runServerList(cmd *cobra.Command, args []string) error {
@@ -29,12 +32,13 @@ func runServerList(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	servers, err := client.ListServers()
+	resp, err := client.ListServers(serverListPage)
 	if err != nil {
 		return err
 	}
 
-	displayServers(servers)
+	displayServers(resp.Servers)
+	ui.DisplayPagination(resp.Meta.Pagination.Page, resp.Meta.Pagination.HasPreviousPage, resp.Meta.Pagination.HasNextPage)
 	return nil
 }
 

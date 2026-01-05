@@ -5,6 +5,18 @@ type ErrorResponse struct {
 	Errors []string `json:"errors"`
 }
 
+// Pagination represents pagination metadata
+type Pagination struct {
+	Page            int  `json:"page"`
+	HasPreviousPage bool `json:"has_previous_page"`
+	HasNextPage     bool `json:"has_next_page"`
+}
+
+// Meta represents response metadata
+type Meta struct {
+	Pagination Pagination `json:"pagination"`
+}
+
 // UserResponse represents the user information response
 type UserResponse struct {
 	FullName    string  `json:"full_name"`
@@ -99,6 +111,7 @@ type CreateSSHKeyRequest struct {
 // Response wrappers for API responses
 type ServersResponse struct {
 	Servers []Server `json:"servers"`
+	Meta    *Meta    `json:"meta,omitempty"`
 }
 
 type ServerResponse struct {
@@ -107,22 +120,27 @@ type ServerResponse struct {
 
 type ProvidersResponse struct {
 	Providers []Provider `json:"providers"`
+	Meta      *Meta      `json:"meta,omitempty"`
 }
 
 type RegionsResponse struct {
 	Regions []Region `json:"regions"`
+	Meta    *Meta    `json:"meta,omitempty"`
 }
 
 type SizesResponse struct {
 	Sizes []Size `json:"sizes"`
+	Meta  *Meta  `json:"meta,omitempty"`
 }
 
 type ImagesResponse struct {
 	Images []Image `json:"images"`
+	Meta   *Meta   `json:"meta,omitempty"`
 }
 
 type KeysResponse struct {
 	Keys []SSHKey `json:"keys"`
+	Meta *Meta    `json:"meta,omitempty"`
 }
 
 type KeyResponse struct {

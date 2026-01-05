@@ -13,6 +13,7 @@ import (
 var (
 	sizesProviderID int
 	sizesRegionID   int
+	sizesPage       int
 )
 
 var sizesCmd = &cobra.Command{
@@ -25,6 +26,7 @@ func init() {
 	rootCmd.AddCommand(sizesCmd)
 	sizesCmd.Flags().IntVarP(&sizesProviderID, "provider", "p", 0, "Provider ID (required)")
 	sizesCmd.Flags().IntVarP(&sizesRegionID, "region", "r", 0, "Region ID (required)")
+	sizesCmd.Flags().IntVar(&sizesPage, "page", 0, "Page number (optional)")
 	sizesCmd.MarkFlagRequired("provider")
 	sizesCmd.MarkFlagRequired("region")
 }
@@ -37,12 +39,12 @@ func runSizes(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	sizes, err := client.ListSizes(sizesRegionID, sizesProviderID)
+	resp, err := client.ListSizes(sizesRegionID, sizesProviderID, sizesPage)
 	if err != nil {
 		return err
 	}
 
-	if len(sizes) == 0 {
+	if len(resp.Sizes) == 0 {
 		fmt.Println("No sizes found.")
 		return nil
 	}
@@ -51,7 +53,7 @@ func runSizes(cmd *cobra.Command, args []string) error {
 		{"ID", "Name", "Memory", "CPU", "Disk", "Price/mo"},
 	}
 
-	for _, size := range sizes {
+	for _, size := range resp.Sizes {
 		rows = append(rows, []string{
 			strconv.Itoa(size.ID),
 			size.Name,
@@ -63,6 +65,7 @@ func runSizes(cmd *cobra.Command, args []string) error {
 	}
 
 	ui.PrintTable(rows)
+	ui.DisplayPagination(resp.Meta.Pagination.Page, resp.Meta.Pagination.HasPreviousPage, resp.Meta.Pagination.HasNextPage)
 
 	return nil
 }

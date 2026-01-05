@@ -129,55 +129,55 @@ func runInteractiveServerCreation(client *api.Client) error {
 
 	// Step 1: Select Provider
 	fmt.Println("\n" + ui.StepHeader(1, "Select Provider"))
-	providers, err := client.ListProviders()
+	providersResp, err := client.ListProviders(0)
 	if err != nil {
 		return err
 	}
-	provider, err := promptProvider(providers)
+	provider, err := promptProvider(providersResp.Providers)
 	if err != nil {
 		return err
 	}
 
 	// Step 2: Select Region
 	fmt.Println("\n" + ui.StepHeader(2, "Select Region"))
-	regions, err := client.ListRegions(provider.ID)
+	regionsResp, err := client.ListRegions(provider.ID, 0)
 	if err != nil {
 		return err
 	}
-	region, err := promptRegion(regions)
+	region, err := promptRegion(regionsResp.Regions)
 	if err != nil {
 		return err
 	}
 
 	// Step 3: Select Size/Plan
 	fmt.Println("\n" + ui.StepHeader(3, "Select Size/Plan"))
-	sizes, err := client.ListSizes(region.ID, provider.ID)
+	sizesResp, err := client.ListSizes(region.ID, provider.ID, 0)
 	if err != nil {
 		return err
 	}
-	size, err := promptSize(sizes)
+	size, err := promptSize(sizesResp.Sizes)
 	if err != nil {
 		return err
 	}
 
 	// Step 4: Select Operating System
 	fmt.Println("\n" + ui.StepHeader(4, "Select Operating System"))
-	images, err := client.ListImages(provider.ID, "x86")
+	imagesResp, err := client.ListImages(provider.ID, "x86", 0)
 	if err != nil {
 		return err
 	}
-	image, err := promptImage(images)
+	image, err := promptImage(imagesResp.Images)
 	if err != nil {
 		return err
 	}
 
 	// Step 5: Select SSH Keys
 	fmt.Println("\n" + ui.StepHeader(5, "Select SSH Keys"))
-	keys, err := client.ListSSHKeys()
+	keysResp, err := client.ListSSHKeys(0)
 	if err != nil {
 		return err
 	}
-	selectedKeyIDs, err := promptSSHKeys(keys)
+	selectedKeyIDs, err := promptSSHKeys(keysResp.Keys)
 	if err != nil {
 		return err
 	}

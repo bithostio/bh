@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var providersPage int
+
 var providersCmd = &cobra.Command{
 	Use:   "providers",
 	Short: "List available cloud providers",
@@ -18,6 +20,7 @@ var providersCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(providersCmd)
+	providersCmd.Flags().IntVar(&providersPage, "page", 0, "Page number (optional)")
 }
 
 func runProviders(cmd *cobra.Command, args []string) error {
@@ -28,12 +31,12 @@ func runProviders(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	providers, err := client.ListProviders()
+	resp, err := client.ListProviders(providersPage)
 	if err != nil {
 		return err
 	}
 
-	if len(providers) == 0 {
+	if len(resp.Providers) == 0 {
 		fmt.Println("No providers found.")
 		return nil
 	}
@@ -42,7 +45,7 @@ func runProviders(cmd *cobra.Command, args []string) error {
 		{"ID", "Name"},
 	}
 
-	for _, provider := range providers {
+	for _, provider := range resp.Providers {
 		rows = append(rows, []string{
 			strconv.Itoa(provider.ID),
 			provider.Name,
@@ -50,6 +53,7 @@ func runProviders(cmd *cobra.Command, args []string) error {
 	}
 
 	ui.PrintTable(rows)
+	ui.DisplayPagination(resp.Meta.Pagination.Page, resp.Meta.Pagination.HasPreviousPage, resp.Meta.Pagination.HasNextPage)
 
 	return nil
 }

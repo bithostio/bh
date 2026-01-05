@@ -14,6 +14,7 @@ var (
 	Red    = color.New(color.FgRed).SprintFunc()
 	Yellow = color.New(color.FgYellow).SprintFunc()
 	Cyan   = color.New(color.FgCyan).SprintFunc()
+	Gray   = color.New(color.FgHiBlack).SprintFunc()
 	Bold   = color.New(color.Bold).SprintFunc()
 )
 
@@ -163,4 +164,46 @@ var ansiRegex = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 // stripAnsi removes ANSI escape codes from a string
 func stripAnsi(s string) string {
 	return ansiRegex.ReplaceAllString(s, "")
+}
+
+// Pagination represents pagination metadata
+type Pagination struct {
+	Page            int
+	HasPreviousPage bool
+	HasNextPage     bool
+}
+
+// DisplayPagination shows pagination information if metadata is available
+func DisplayPagination(page int, hasPrev, hasNext bool) {
+	// Don't show pagination info if we're on page 1 and there's no next page
+	if page == 1 && !hasNext {
+		return
+	}
+
+	fmt.Println()
+
+	// Show current page
+	fmt.Printf("Page %d", page)
+
+	// Show navigation hints
+	var hints []string
+	if hasPrev {
+		hints = append(hints, Gray(fmt.Sprintf("--page %d for previous", page-1)))
+	}
+	if hasNext {
+		hints = append(hints, Gray(fmt.Sprintf("--page %d for next", page+1)))
+	}
+
+	if len(hints) > 0 {
+		fmt.Print(" (")
+		for i, hint := range hints {
+			if i > 0 {
+				fmt.Print(", ")
+			}
+			fmt.Print(hint)
+		}
+		fmt.Print(")")
+	}
+
+	fmt.Println()
 }

@@ -28,10 +28,14 @@ func NewClient(baseURL, apiKey string) *Client {
 }
 
 // ListServers retrieves all servers for the authenticated user
-func (c *Client) ListServers() ([]Server, error) {
+func (c *Client) ListServers(page int) (*ServersResponse, error) {
 	var resp ServersResponse
-	err := c.do("GET", "servers", nil, &resp)
-	return resp.Servers, err
+	path := "servers"
+	if page > 0 {
+		path = fmt.Sprintf("servers?page=%d", page)
+	}
+	err := c.do("GET", path, nil, &resp)
+	return &resp, err
 }
 
 // CreateServer creates a new server
@@ -47,41 +51,58 @@ func (c *Client) DeleteServer(id int) error {
 }
 
 // ListProviders retrieves all available cloud providers
-func (c *Client) ListProviders() ([]Provider, error) {
+func (c *Client) ListProviders(page int) (*ProvidersResponse, error) {
 	var resp ProvidersResponse
-	err := c.do("GET", "providers", nil, &resp)
-	return resp.Providers, err
+	path := "providers"
+	if page > 0 {
+		path = fmt.Sprintf("providers?page=%d", page)
+	}
+	err := c.do("GET", path, nil, &resp)
+	return &resp, err
 }
 
 // ListRegions retrieves regions for a provider
-func (c *Client) ListRegions(providerID int) ([]Region, error) {
+func (c *Client) ListRegions(providerID, page int) (*RegionsResponse, error) {
 	var resp RegionsResponse
 	path := fmt.Sprintf("regions?provider_id=%d", providerID)
+	if page > 0 {
+		path = fmt.Sprintf("regions?provider_id=%d&page=%d", providerID, page)
+	}
 	err := c.do("GET", path, nil, &resp)
-	return resp.Regions, err
+	return &resp, err
 }
 
 // ListSizes retrieves available server sizes
-func (c *Client) ListSizes(regionID, providerID int) ([]Size, error) {
+func (c *Client) ListSizes(regionID, providerID, page int) (*SizesResponse, error) {
 	var resp SizesResponse
 	path := fmt.Sprintf("sizes?region_id=%d&provider_id=%d", regionID, providerID)
+	if page > 0 {
+		path = fmt.Sprintf("sizes?region_id=%d&provider_id=%d&page=%d", regionID, providerID, page)
+	}
 	err := c.do("GET", path, nil, &resp)
-	return resp.Sizes, err
+	return &resp, err
 }
 
 // ListImages retrieves available OS images
-func (c *Client) ListImages(providerID int, architecture string) ([]Image, error) {
+func (c *Client) ListImages(providerID int, architecture string, page int) (*ImagesResponse, error) {
 	var resp ImagesResponse
 	path := fmt.Sprintf("images?provider_id=%d&architecture=%s&type=STANDARD", providerID, architecture)
+	if page > 0 {
+		path = fmt.Sprintf("images?provider_id=%d&architecture=%s&type=STANDARD&page=%d", providerID, architecture, page)
+	}
 	err := c.do("GET", path, nil, &resp)
-	return resp.Images, err
+	return &resp, err
 }
 
 // ListSSHKeys retrieves the user's SSH keys
-func (c *Client) ListSSHKeys() ([]SSHKey, error) {
+func (c *Client) ListSSHKeys(page int) (*KeysResponse, error) {
 	var resp KeysResponse
-	err := c.do("GET", "keys", nil, &resp)
-	return resp.Keys, err
+	path := "keys"
+	if page > 0 {
+		path = fmt.Sprintf("keys?page=%d", page)
+	}
+	err := c.do("GET", path, nil, &resp)
+	return &resp, err
 }
 
 // CreateSSHKey creates a new SSH key

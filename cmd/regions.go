@@ -12,6 +12,7 @@ import (
 
 var (
 	regionsProviderID int
+	regionsPage       int
 )
 
 var regionsCmd = &cobra.Command{
@@ -23,6 +24,7 @@ var regionsCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(regionsCmd)
 	regionsCmd.Flags().IntVarP(&regionsProviderID, "provider", "p", 0, "Provider ID (required)")
+	regionsCmd.Flags().IntVar(&regionsPage, "page", 0, "Page number (optional)")
 	regionsCmd.MarkFlagRequired("provider")
 }
 
@@ -34,12 +36,12 @@ func runRegions(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	regions, err := client.ListRegions(regionsProviderID)
+	resp, err := client.ListRegions(regionsProviderID, regionsPage)
 	if err != nil {
 		return err
 	}
 
-	if len(regions) == 0 {
+	if len(resp.Regions) == 0 {
 		fmt.Println("No regions found.")
 		return nil
 	}
@@ -48,7 +50,7 @@ func runRegions(cmd *cobra.Command, args []string) error {
 		{"ID", "Name", "Slug", "Location"},
 	}
 
-	for _, region := range regions {
+	for _, region := range resp.Regions {
 		rows = append(rows, []string{
 			strconv.Itoa(region.ID),
 			region.Name,
@@ -58,6 +60,7 @@ func runRegions(cmd *cobra.Command, args []string) error {
 	}
 
 	ui.PrintTable(rows)
+	ui.DisplayPagination(resp.Meta.Pagination.Page, resp.Meta.Pagination.HasPreviousPage, resp.Meta.Pagination.HasNextPage)
 
 	return nil
 }

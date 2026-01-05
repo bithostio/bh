@@ -13,6 +13,7 @@ import (
 var (
 	imagesProviderID   int
 	imagesArchitecture string
+	imagesPage         int
 )
 
 var imagesCmd = &cobra.Command{
@@ -25,6 +26,7 @@ func init() {
 	rootCmd.AddCommand(imagesCmd)
 	imagesCmd.Flags().IntVarP(&imagesProviderID, "provider", "p", 0, "Provider ID (required)")
 	imagesCmd.Flags().StringVarP(&imagesArchitecture, "arch", "a", "x86", "Architecture (x86 or arm)")
+	imagesCmd.Flags().IntVar(&imagesPage, "page", 0, "Page number (optional)")
 	imagesCmd.MarkFlagRequired("provider")
 }
 
@@ -36,12 +38,12 @@ func runImages(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	images, err := client.ListImages(imagesProviderID, imagesArchitecture)
+	resp, err := client.ListImages(imagesProviderID, imagesArchitecture, imagesPage)
 	if err != nil {
 		return err
 	}
 
-	if len(images) == 0 {
+	if len(resp.Images) == 0 {
 		fmt.Println("No images found.")
 		return nil
 	}
@@ -50,7 +52,7 @@ func runImages(cmd *cobra.Command, args []string) error {
 		{"ID", "Name", "Distribution", "Architecture"},
 	}
 
-	for _, image := range images {
+	for _, image := range resp.Images {
 		rows = append(rows, []string{
 			strconv.Itoa(image.ID),
 			image.Name,
@@ -60,6 +62,7 @@ func runImages(cmd *cobra.Command, args []string) error {
 	}
 
 	ui.PrintTable(rows)
+	ui.DisplayPagination(resp.Meta.Pagination.Page, resp.Meta.Pagination.HasPreviousPage, resp.Meta.Pagination.HasNextPage)
 
 	return nil
 }
