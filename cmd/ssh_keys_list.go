@@ -6,7 +6,7 @@ import (
 
 	"github.com/bithostio/bh/internal/api"
 	"github.com/bithostio/bh/internal/config"
-	"github.com/bithostio/bh/internal/ui"
+	"github.com/bithostio/bh/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -55,13 +55,13 @@ func runSSHKeysList(cmd *cobra.Command, args []string) error {
 
 		rows = append(rows, []string{
 			strconv.Itoa(key.ID),
-			ui.Truncate(key.Label, 30),
+			cli.Truncate(key.Label, 30),
 			fingerprint,
 		})
 	}
 
-	ui.PrintTable(rows)
-	ui.DisplayPagination(resp.Meta.Pagination)
+	cli.PrintTable(rows)
+	cli.DisplayPagination(resp.Meta.Pagination)
 
 	return nil
 }

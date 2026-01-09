@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bithostio/bh/internal/ui"
+	"github.com/bithostio/bh/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +23,7 @@ Get started by running: bh auth`,
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, ui.Red(err.Error()))
+		fmt.Fprintln(os.Stderr, cli.Red(err.Error()))
 		os.Exit(1)
 	}
 }

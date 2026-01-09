@@ -6,7 +6,7 @@ import (
 
 	"github.com/bithostio/bh/internal/api"
 	"github.com/bithostio/bh/internal/config"
-	"github.com/bithostio/bh/internal/ui"
+	"github.com/bithostio/bh/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -57,15 +57,15 @@ func runSizes(cmd *cobra.Command, args []string) error {
 		rows = append(rows, []string{
 			strconv.Itoa(size.ID),
 			size.Name,
-			ui.FormatMemory(size.Memory),
+			cli.FormatMemory(size.Memory),
 			size.Processor,
-			ui.FormatStorage(size.Disk),
-			ui.FormatMoney(size.Price),
+			cli.FormatStorage(size.Disk),
+			cli.FormatMoney(size.Price),
 		})
 	}
 
-	ui.PrintTable(rows)
-	ui.DisplayPagination(resp.Meta.Pagination)
+	cli.PrintTable(rows)
+	cli.DisplayPagination(resp.Meta.Pagination)
 
 	return nil
 }

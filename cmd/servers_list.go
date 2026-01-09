@@ -6,7 +6,7 @@ import (
 
 	"github.com/bithostio/bh/internal/api"
 	"github.com/bithostio/bh/internal/config"
-	"github.com/bithostio/bh/internal/ui"
+	"github.com/bithostio/bh/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +38,7 @@ func runServerList(cmd *cobra.Command, args []string) error {
 	}
 
 	displayServers(resp.Servers)
-	ui.DisplayPagination(resp.Meta.Pagination)
+	cli.DisplayPagination(resp.Meta.Pagination)
 	return nil
 }
 
@@ -60,30 +60,30 @@ func displayServers(servers []api.Server) {
 
 		rows = append(rows, []string{
 			strconv.Itoa(server.ID),
-			ui.Truncate(server.Name, 20),
+			cli.Truncate(server.Name, 20),
 			formatServerStatus(server),
 			ipAddr,
-			ui.FormatMoney(server.CostSoFar),
+			cli.FormatMoney(server.CostSoFar),
 			strconv.Itoa(server.ProviderID),
 		})
 	}
 
-	ui.PrintTable(rows)
+	cli.PrintTable(rows)
 }
 
 func formatServerStatus(server api.Server) string {
 	if server.Pending {
-		return ui.Yellow("pending")
+		return cli.Yellow("pending")
 	}
 
 	switch server.Status {
 	case "active":
 		if server.Power {
-			return ui.Green("active")
+			return cli.Green("active")
 		}
-		return ui.Yellow("powered off")
+		return cli.Yellow("powered off")
 	case "failed":
-		return ui.Red("failed")
+		return cli.Red("failed")
 	default:
 		return server.Status
 	}

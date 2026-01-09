@@ -8,7 +8,7 @@ import (
 
 	"github.com/bithostio/bh/internal/api"
 	"github.com/bithostio/bh/internal/config"
-	"github.com/bithostio/bh/internal/ui"
+	"github.com/bithostio/bh/internal/cli"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
@@ -92,7 +92,7 @@ func runServerNew(cmd *cobra.Command, args []string) error {
 }
 
 func createServer(client *api.Client, name string, providerID, regionID, sizeID, imageID int, keyIDs []int, backups bool) error {
-	stop, cancel := ui.ShowProgress("Creating server...")
+	stop, cancel := cli.ShowProgress("Creating server...")
 
 	req := &api.CreateServerRequest{
 		Name:           name,
@@ -114,21 +114,21 @@ func createServer(client *api.Client, name string, providerID, regionID, sizeID,
 
 	stop() // Stop spinner with success checkmark
 
-	fmt.Printf("\n%s Server created successfully!\n\n", ui.Green("✓"))
+	fmt.Printf("\n%s Server created successfully!\n\n", cli.Green("✓"))
 	fmt.Printf("  ID:     %d\n", server.ID)
 	fmt.Printf("  Name:   %s\n", server.Name)
-	fmt.Printf("  Status: %s\n", ui.Yellow("Pending"))
+	fmt.Printf("  Status: %s\n", cli.Yellow("Pending"))
 	fmt.Printf("\nYour server is being provisioned. Run 'bh servers list' to check status.\n")
 
 	return nil
 }
 
 func runInteractiveServerCreation(client *api.Client) error {
-	fmt.Println(ui.Header("Bithost Server Creation Wizard"))
-	fmt.Println(ui.Divider(50))
+	fmt.Println(cli.Header("Bithost Server Creation Wizard"))
+	fmt.Println(cli.Divider(50))
 
 	// Step 1: Select Provider
-	fmt.Println("\n" + ui.StepHeader(1, "Select Provider"))
+	fmt.Println("\n" + cli.StepHeader(1, "Select Provider"))
 	providersResp, err := client.ListProviders(0)
 	if err != nil {
 		return err
@@ -139,7 +139,7 @@ func runInteractiveServerCreation(client *api.Client) error {
 	}
 
 	// Step 2: Select Region
-	fmt.Println("\n" + ui.StepHeader(2, "Select Region"))
+	fmt.Println("\n" + cli.StepHeader(2, "Select Region"))
 	regionsResp, err := client.ListRegions(provider.ID, 0)
 	if err != nil {
 		return err
@@ -150,7 +150,7 @@ func runInteractiveServerCreation(client *api.Client) error {
 	}
 
 	// Step 3: Select Size/Plan
-	fmt.Println("\n" + ui.StepHeader(3, "Select Size/Plan"))
+	fmt.Println("\n" + cli.StepHeader(3, "Select Size/Plan"))
 	sizesResp, err := client.ListSizes(region.ID, provider.ID, 0)
 	if err != nil {
 		return err
@@ -161,7 +161,7 @@ func runInteractiveServerCreation(client *api.Client) error {
 	}
 
 	// Step 4: Select Operating System
-	fmt.Println("\n" + ui.StepHeader(4, "Select Operating System"))
+	fmt.Println("\n" + cli.StepHeader(4, "Select Operating System"))
 	imagesResp, err := client.ListImages(provider.ID, "x86", 0)
 	if err != nil {
 		return err
@@ -172,7 +172,7 @@ func runInteractiveServerCreation(client *api.Client) error {
 	}
 
 	// Step 5: Select SSH Keys
-	fmt.Println("\n" + ui.StepHeader(5, "Select SSH Keys"))
+	fmt.Println("\n" + cli.StepHeader(5, "Select SSH Keys"))
 	keysResp, err := client.ListSSHKeys(0)
 	if err != nil {
 		return err
@@ -183,14 +183,14 @@ func runInteractiveServerCreation(client *api.Client) error {
 	}
 
 	// Step 6: Enable Backups
-	fmt.Println("\n" + ui.StepHeader(6, "Backups"))
+	fmt.Println("\n" + cli.StepHeader(6, "Backups"))
 	backups, err := promptBackups()
 	if err != nil {
 		return err
 	}
 
 	// Step 7: Server Name
-	fmt.Println("\n" + ui.StepHeader(7, "Server Name"))
+	fmt.Println("\n" + cli.StepHeader(7, "Server Name"))
 	defaultName := fmt.Sprintf("server-%d", time.Now().Unix())
 	name, err := promptServerName(defaultName)
 	if err != nil {
@@ -397,19 +397,19 @@ func confirmCreation(summary string) (bool, error) {
 func buildSummary(name string, provider *api.Provider, region *api.Region, size *api.Size, image *api.Image, backups bool, keyCount int) string {
 	var sb strings.Builder
 
-	sb.WriteString(ui.Header("Server Configuration Summary:") + "\n")
-	sb.WriteString(ui.Divider(50) + "\n")
+	sb.WriteString(cli.Header("Server Configuration Summary:") + "\n")
+	sb.WriteString(cli.Divider(50) + "\n")
 	sb.WriteString(fmt.Sprintf("  %-15s %s\n", "Name:", name))
 	sb.WriteString(fmt.Sprintf("  %-15s %s\n", "Provider:", provider.Name))
 	sb.WriteString(fmt.Sprintf("  %-15s %s\n", "Region:", region.Name))
 	sb.WriteString(fmt.Sprintf("  %-15s %s (%sMB RAM, %s)\n", "Size:", size.Name, size.Memory, size.Processor))
 	sb.WriteString(fmt.Sprintf("  %-15s %s\n", "OS:", image.Name))
 	sb.WriteString(fmt.Sprintf("  %-15s %d selected\n", "SSH Keys:", keyCount))
-	sb.WriteString(fmt.Sprintf("  %-15s %s\n", "Backups:", ui.FormatEnabled(backups)))
+	sb.WriteString(fmt.Sprintf("  %-15s %s\n", "Backups:", cli.FormatEnabled(backups)))
 
-	cost := ui.FormatMoney(size.Price)
+	cost := cli.FormatMoney(size.Price)
 	if backups {
-		cost += fmt.Sprintf(" + %s (backups)", ui.FormatMoney(size.Price*0.2))
+		cost += fmt.Sprintf(" + %s (backups)", cli.FormatMoney(size.Price*0.2))
 	}
 	sb.WriteString(fmt.Sprintf("  %-15s %s\n", "Monthly Cost:", cost))
 

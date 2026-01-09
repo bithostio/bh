@@ -6,7 +6,7 @@ import (
 
 	"github.com/bithostio/bh/internal/api"
 	"github.com/bithostio/bh/internal/config"
-	"github.com/bithostio/bh/internal/ui"
+	"github.com/bithostio/bh/internal/cli"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
@@ -57,7 +57,7 @@ func runServerDelete(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	stop, cancel := ui.ShowProgress(fmt.Sprintf("Deleting server %d...", serverID))
+	stop, cancel := cli.ShowProgress(fmt.Sprintf("Deleting server %d...", serverID))
 	err = client.DeleteServer(serverID)
 
 	if err != nil {
@@ -67,7 +67,7 @@ func runServerDelete(cmd *cobra.Command, args []string) error {
 
 	stop()
 
-	fmt.Printf("%s Server %d deleted successfully\n", ui.Green("✓"), serverID)
+	fmt.Printf("%s Server %d deleted successfully\n", cli.Green("✓"), serverID)
 
 	return nil
 }

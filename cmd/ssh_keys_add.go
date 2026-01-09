@@ -7,7 +7,7 @@ import (
 
 	"github.com/bithostio/bh/internal/api"
 	"github.com/bithostio/bh/internal/config"
-	"github.com/bithostio/bh/internal/ui"
+	"github.com/bithostio/bh/internal/cli"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
@@ -108,7 +108,7 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("SSH key content is empty")
 	}
 
-	stop, cancel := ui.ShowProgress("Adding SSH key...")
+	stop, cancel := cli.ShowProgress("Adding SSH key...")
 
 	req := &api.CreateSSHKeyRequest{
 		Label:      label,
@@ -125,7 +125,7 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 
 	stop()
 
-	fmt.Printf("\n%s SSH key added successfully!\n\n", ui.Green("✓"))
+	fmt.Printf("\n%s SSH key added successfully!\n\n", cli.Green("✓"))
 	fmt.Printf("  ID:    %d\n", key.ID)
 	fmt.Printf("  Label: %s\n", key.Label)
 

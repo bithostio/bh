@@ -6,7 +6,7 @@ import (
 
 	"github.com/bithostio/bh/internal/api"
 	"github.com/bithostio/bh/internal/config"
-	"github.com/bithostio/bh/internal/ui"
+	"github.com/bithostio/bh/internal/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -61,8 +61,8 @@ func runImages(cmd *cobra.Command, args []string) error {
 		})
 	}
 
-	ui.PrintTable(rows)
-	ui.DisplayPagination(resp.Meta.Pagination)
+	cli.PrintTable(rows)
+	cli.DisplayPagination(resp.Meta.Pagination)
 
 	return nil
 }
