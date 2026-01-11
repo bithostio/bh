@@ -10,18 +10,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var serverListPage int
+var (
+	serverListPage int
+	showAllServers bool
+)
 
 var serverListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
-	Short:   "List all servers",
+	Short:   "List active servers (use --all for all servers)",
 	RunE:    runServerList,
 }
 
 func init() {
 	serverCmd.AddCommand(serverListCmd)
 	serverListCmd.Flags().IntVar(&serverListPage, "page", 0, "Page number (optional)")
+	serverListCmd.Flags().BoolVarP(&showAllServers, "all", "a", false, "Show all servers including failed")
 }
 
 func runServerList(cmd *cobra.Command, args []string) error {
@@ -37,14 +41,34 @@ func runServerList(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	displayServers(resp.Servers)
+	servers := resp.Servers
+	// Filter to active servers by default
+	if !showAllServers {
+		servers = filterActiveServers(servers)
+	}
+
+	displayServers(servers, showAllServers)
 	cli.DisplayPagination(resp.Meta.Pagination)
 	return nil
 }
 
-func displayServers(servers []api.Server) {
+func filterActiveServers(servers []api.Server) []api.Server {
+	var active []api.Server
+	for _, s := range servers {
+		if s.Status == "active" || s.Pending {
+			active = append(active, s)
+		}
+	}
+	return active
+}
+
+func displayServers(servers []api.Server, showAll bool) {
 	if len(servers) == 0 {
-		fmt.Println("No servers found.")
+		if showAll {
+			fmt.Println("No servers found.")
+		} else {
+			fmt.Println("No active servers found. Use --all to see all servers.")
+		}
 		return
 	}
 

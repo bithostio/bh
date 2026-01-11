@@ -5,9 +5,8 @@ import (
 	"strconv"
 
 	"github.com/bithostio/bh/internal/api"
-	"github.com/bithostio/bh/internal/config"
 	"github.com/bithostio/bh/internal/cli"
-	"github.com/manifoldco/promptui"
+	"github.com/bithostio/bh/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -42,18 +41,17 @@ func runServerDelete(cmd *cobra.Command, args []string) error {
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
 	if !forceDelete {
-		prompt := promptui.Prompt{
-			Label:     fmt.Sprintf("Delete server %d", serverID),
-			IsConfirm: true,
-		}
-
-		_, err := prompt.Run()
+		confirmed, err := cli.Confirm(fmt.Sprintf("Delete server %d?", serverID))
 		if err != nil {
-			if err == promptui.ErrAbort {
+			if err == cli.ErrAborted {
 				fmt.Println("Cancelled.")
 				return nil
 			}
 			return err
+		}
+		if !confirmed {
+			fmt.Println("Cancelled.")
+			return nil
 		}
 	}
 

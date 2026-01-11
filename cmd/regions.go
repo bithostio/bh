@@ -25,7 +25,7 @@ func init() {
 	rootCmd.AddCommand(regionsCmd)
 	regionsCmd.Flags().IntVarP(&regionsProviderID, "provider", "p", 0, "Provider ID (required)")
 	regionsCmd.Flags().IntVar(&regionsPage, "page", 0, "Page number (optional)")
-	regionsCmd.MarkFlagRequired("provider")
+	_ = regionsCmd.MarkFlagRequired("provider")
 }
 
 func runRegions(cmd *cobra.Command, args []string) error {

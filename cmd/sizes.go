@@ -27,8 +27,8 @@ func init() {
 	sizesCmd.Flags().IntVarP(&sizesProviderID, "provider", "p", 0, "Provider ID (required)")
 	sizesCmd.Flags().IntVarP(&sizesRegionID, "region", "r", 0, "Region ID (required)")
 	sizesCmd.Flags().IntVar(&sizesPage, "page", 0, "Page number (optional)")
-	sizesCmd.MarkFlagRequired("provider")
-	sizesCmd.MarkFlagRequired("region")
+	_ = sizesCmd.MarkFlagRequired("provider")
+	_ = sizesCmd.MarkFlagRequired("region")
 }
 
 func runSizes(cmd *cobra.Command, args []string) error {

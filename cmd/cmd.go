@@ -10,13 +10,10 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "bh",
-	Short: "bithost.io CLI - Manage your servers from the command line",
-	Long: `bh is a command-line interface for Bithost.io that allows you to:
-  - Create and manage servers
-  - Check your account balance
-  - List and delete servers
+	Short: "Bithost.io CLI - create and manage cloud servers",
+	Long: `Bithost.io CLI - create and manage cloud servers.
 
-Get started by running: bh auth`,
+Run 'bh tui' for interactive mode, or 'bh auth' to get started.`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
 }

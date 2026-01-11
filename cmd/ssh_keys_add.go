@@ -6,9 +6,8 @@ import (
 	"strings"
 
 	"github.com/bithostio/bh/internal/api"
-	"github.com/bithostio/bh/internal/config"
 	"github.com/bithostio/bh/internal/cli"
-	"github.com/manifoldco/promptui"
+	"github.com/bithostio/bh/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -55,16 +54,14 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 
 	label := keyLabel
 	if label == "" {
-		prompt := promptui.Prompt{
-			Label: "SSH Key Label",
-			Validate: func(input string) error {
+		label, err = cli.Input("SSH Key Label",
+			cli.WithValidation(func(input string) error {
 				if len(input) < 1 {
 					return fmt.Errorf("label cannot be empty")
 				}
 				return nil
-			},
-		}
-		label, err = prompt.Run()
+			}),
+		)
 		if err != nil {
 			return err
 		}
@@ -80,11 +77,9 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 		}
 		publicKey = strings.TrimSpace(string(data))
 	} else {
-		prompt := promptui.Prompt{
-			Label:   "Path to SSH public key file",
-			Default: "~/.ssh/id_rsa.pub",
-		}
-		path, err := prompt.Run()
+		path, err := cli.Input("Path to SSH public key file",
+			cli.WithDefault("~/.ssh/id_rsa.pub"),
+		)
 		if err != nil {
 			return err
 		}

@@ -27,7 +27,7 @@ func init() {
 	imagesCmd.Flags().IntVarP(&imagesProviderID, "provider", "p", 0, "Provider ID (required)")
 	imagesCmd.Flags().StringVarP(&imagesArchitecture, "arch", "a", "x86", "Architecture (x86 or arm)")
 	imagesCmd.Flags().IntVar(&imagesPage, "page", 0, "Page number (optional)")
-	imagesCmd.MarkFlagRequired("provider")
+	_ = imagesCmd.MarkFlagRequired("provider")
 }
 
 func runImages(cmd *cobra.Command, args []string) error {
