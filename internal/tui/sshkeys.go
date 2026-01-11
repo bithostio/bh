@@ -205,18 +205,18 @@ func (m sshkeysModel) View() string {
 	}
 
 	for i, key := range m.keys {
-		// Truncate the key for display
 		keyPreview := key.Key
 		if len(keyPreview) > 40 {
 			keyPreview = keyPreview[:37] + "..."
 		}
 
-		line := padRight(key.Label, 20) + "  " + subtleStyle.Render(keyPreview)
+		label := padRight(key.Label, 20)
+		preview := subtleStyle.Render(keyPreview)
 
 		if i == m.cursor {
-			b.WriteString(selectedStyle.Render("> ") + selectedStyle.Render(key.Label) + "  " + subtleStyle.Render(keyPreview) + "\n")
+			b.WriteString(selectedStyle.Render("> ") + selectedStyle.Render(label) + "  " + preview + "\n")
 		} else {
-			b.WriteString("  " + line + "\n")
+			b.WriteString("  " + label + "  " + preview + "\n")
 		}
 	}
 

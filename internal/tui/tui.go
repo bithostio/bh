@@ -275,11 +275,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.status = ""
 		}
 
+		// Auto-refresh dashboard data when on dashboard view
 		if m.view == viewDashboard && !m.modal.active && !m.needsAuth {
-			cmds = append(cmds, m.fetchServers(), m.fetchUser(), tickCmd())
-		} else {
-			cmds = append(cmds, tickCmd())
+			cmds = append(cmds, m.fetchServers(), m.fetchUser())
 		}
+		cmds = append(cmds, tickCmd())
 
 	case clearStatusMsg:
 		// Will be cleared on next tick if older than 3s

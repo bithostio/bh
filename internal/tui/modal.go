@@ -83,17 +83,9 @@ func (m modalModel) View(background string, width, height int) string {
 	modalWidth := lipgloss.Width(modal)
 	modalHeight := lipgloss.Height(modal)
 
-	x := (width - modalWidth) / 2
-	y := (height - modalHeight) / 2
+	x := max((width-modalWidth)/2, 0)
+	y := max((height-modalHeight)/2, 0)
 
-	if x < 0 {
-		x = 0
-	}
-	if y < 0 {
-		y = 0
-	}
-
-	// Overlay modal on background
 	return placeOverlay(x, y, modal, background, width, height)
 }
 
@@ -135,9 +127,10 @@ func placeOverlay(x, y int, overlay, background string, width, height int) strin
 }
 
 // insertAt inserts overlay text into a background line at position x
-func insertAt(bgLine string, x int, overlay string, maxWidth int) string {
-	// Pad background line if needed
+func insertAt(bgLine string, x int, overlay string, _ int) string {
 	bgRunes := []rune(bgLine)
+
+	// Pad background line to reach x position
 	for len(bgRunes) < x {
 		bgRunes = append(bgRunes, ' ')
 	}
@@ -145,26 +138,12 @@ func insertAt(bgLine string, x int, overlay string, maxWidth int) string {
 	overlayRunes := []rune(overlay)
 	overlayWidth := lipgloss.Width(overlay)
 
-	// Build result
-	result := make([]rune, 0, maxWidth)
+	// Build: background prefix + overlay + background suffix
+	result := append(bgRunes[:x], overlayRunes...)
 
-	// Add background before overlay
-	for i := 0; i < x && i < len(bgRunes); i++ {
-		result = append(result, bgRunes[i])
-	}
-
-	// Pad to x position
-	for len(result) < x {
-		result = append(result, ' ')
-	}
-
-	// Add overlay
-	result = append(result, overlayRunes...)
-
-	// Add background after overlay
 	afterX := x + overlayWidth
-	for i := afterX; i < len(bgRunes); i++ {
-		result = append(result, bgRunes[i])
+	if afterX < len(bgRunes) {
+		result = append(result, bgRunes[afterX:]...)
 	}
 
 	return string(result)

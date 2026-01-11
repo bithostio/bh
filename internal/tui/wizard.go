@@ -151,9 +151,7 @@ func (m wizardModel) visibleLines() int {
 	available := m.height - reserved
 
 	// Ensure at least 5 items are visible for usability
-	if available < 5 {
-		available = 5
-	}
+	available = max(available, 5)
 
 	return available
 }
@@ -378,13 +376,14 @@ func (m wizardModel) renderListStep(title string, items string) string {
 	return fmt.Sprintf("%s\n\n%s", subtleStyle.Render(title), items)
 }
 
-func (m wizardModel) renderProviders() string {
+// renderScrollableList renders a scrollable list with optional scroll indicators.
+// formatItem receives the index and returns the display text for that item.
+func (m wizardModel) renderScrollableList(listLen int, formatItem func(i int) string) string {
 	var b strings.Builder
 	visible := m.visibleLines()
-	end := min(m.offset+visible, len(m.providers))
-	needsScroll := len(m.providers) > visible
+	end := min(m.offset+visible, listLen)
+	needsScroll := listLen > visible
 
-	// Always reserve space for scroll indicator (keeps list stable)
 	if needsScroll {
 		if m.offset > 0 {
 			b.WriteString(subtleStyle.Render("  ↑ more above"))
@@ -393,123 +392,50 @@ func (m wizardModel) renderProviders() string {
 	}
 
 	for i := m.offset; i < end; i++ {
-		p := m.providers[i]
+		line := formatItem(i)
 		if i == m.cursor {
-			b.WriteString(selectedStyle.Render("> ") + selectedStyle.Render(p.Name) + "\n")
+			b.WriteString(selectedStyle.Render("> ") + selectedStyle.Render(line) + "\n")
 		} else {
-			b.WriteString("  " + p.Name + "\n")
+			b.WriteString("  " + line + "\n")
 		}
 	}
 
-	// Always reserve space for scroll indicator
 	if needsScroll {
-		if end < len(m.providers) {
+		if end < listLen {
 			b.WriteString(subtleStyle.Render("  ↓ more below"))
 		}
 		b.WriteString("\n")
 	}
 
 	return b.String()
+}
+
+func (m wizardModel) renderProviders() string {
+	return m.renderScrollableList(len(m.providers), func(i int) string {
+		return m.providers[i].Name
+	})
 }
 
 func (m wizardModel) renderRegions() string {
-	var b strings.Builder
-	visible := m.visibleLines()
-	end := min(m.offset+visible, len(m.regions))
-	needsScroll := len(m.regions) > visible
-
-	if needsScroll {
-		if m.offset > 0 {
-			b.WriteString(subtleStyle.Render("  ↑ more above"))
-		}
-		b.WriteString("\n")
-	}
-
-	for i := m.offset; i < end; i++ {
+	return m.renderScrollableList(len(m.regions), func(i int) string {
 		r := m.regions[i]
-		line := fmt.Sprintf("%s (%s)", r.Name, r.Origin)
-		if i == m.cursor {
-			b.WriteString(selectedStyle.Render("> ") + selectedStyle.Render(line) + "\n")
-		} else {
-			b.WriteString("  " + line + "\n")
-		}
-	}
-
-	if needsScroll {
-		if end < len(m.regions) {
-			b.WriteString(subtleStyle.Render("  ↓ more below"))
-		}
-		b.WriteString("\n")
-	}
-
-	return b.String()
+		return fmt.Sprintf("%s (%s)", r.Name, r.Origin)
+	})
 }
 
 func (m wizardModel) renderSizes() string {
-	var b strings.Builder
-	visible := m.visibleLines()
-	end := min(m.offset+visible, len(m.sizes))
-	needsScroll := len(m.sizes) > visible
-
-	if needsScroll {
-		if m.offset > 0 {
-			b.WriteString(subtleStyle.Render("  ↑ more above"))
-		}
-		b.WriteString("\n")
-	}
-
-	for i := m.offset; i < end; i++ {
+	return m.renderScrollableList(len(m.sizes), func(i int) string {
 		s := m.sizes[i]
-		line := fmt.Sprintf("%-20s %s/mo  %s  %sMB RAM  %sGB SSD",
+		return fmt.Sprintf("%-20s %s/mo  %s  %sMB RAM  %sGB SSD",
 			s.Name, FormatMoney(s.Price), s.Processor, s.Memory, s.Disk)
-		if i == m.cursor {
-			b.WriteString(selectedStyle.Render("> ") + selectedStyle.Render(line) + "\n")
-		} else {
-			b.WriteString("  " + line + "\n")
-		}
-	}
-
-	if needsScroll {
-		if end < len(m.sizes) {
-			b.WriteString(subtleStyle.Render("  ↓ more below"))
-		}
-		b.WriteString("\n")
-	}
-
-	return b.String()
+	})
 }
 
 func (m wizardModel) renderImages() string {
-	var b strings.Builder
-	visible := m.visibleLines()
-	end := min(m.offset+visible, len(m.images))
-	needsScroll := len(m.images) > visible
-
-	if needsScroll {
-		if m.offset > 0 {
-			b.WriteString(subtleStyle.Render("  ↑ more above"))
-		}
-		b.WriteString("\n")
-	}
-
-	for i := m.offset; i < end; i++ {
+	return m.renderScrollableList(len(m.images), func(i int) string {
 		img := m.images[i]
-		line := fmt.Sprintf("%s (%s)", img.Name, img.Architecture)
-		if i == m.cursor {
-			b.WriteString(selectedStyle.Render("> ") + selectedStyle.Render(line) + "\n")
-		} else {
-			b.WriteString("  " + line + "\n")
-		}
-	}
-
-	if needsScroll {
-		if end < len(m.images) {
-			b.WriteString(subtleStyle.Render("  ↓ more below"))
-		}
-		b.WriteString("\n")
-	}
-
-	return b.String()
+		return fmt.Sprintf("%s (%s)", img.Name, img.Architecture)
+	})
 }
 
 func (m wizardModel) renderSSHKeysStep() string {
@@ -536,7 +462,7 @@ func (m wizardModel) renderSSHKeysStep() string {
 	for i := m.offset; i < end; i++ {
 		k := m.sshkeys[i]
 		checked := "[ ]"
-		if contains(m.selectedKeys, k.ID) {
+		if slices.Contains(m.selectedKeys, k.ID) {
 			checked = activeStyle.Render("[x]")
 		}
 		line := fmt.Sprintf("%s %s", checked, k.Label)
@@ -570,8 +496,8 @@ func (m wizardModel) renderBackupsStep() string {
 		noCheck = activeStyle.Render("(•)")
 	}
 
-	b.WriteString(fmt.Sprintf("  %s Yes\n", yesCheck))
-	b.WriteString(fmt.Sprintf("  %s No\n", noCheck))
+	fmt.Fprintf(&b, "  %s Yes\n", yesCheck)
+	fmt.Fprintf(&b, "  %s No\n", noCheck)
 	b.WriteString("\n")
 	b.WriteString(helpStyle.Render("space: toggle • enter: continue"))
 	return b.String()
@@ -619,8 +545,4 @@ func toggleSelection(slice []int, item int) []int {
 		}
 	}
 	return append(slice, item)
-}
-
-func contains(slice []int, item int) bool {
-	return slices.Contains(slice, item)
 }
