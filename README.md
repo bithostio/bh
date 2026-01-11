@@ -18,19 +18,40 @@ go install github.com/bithostio/bh@latest
 ## Quick Start
 
 ```bash
-# 1. Configure authentication
+# Configure authentication
 bh auth
-
-# 2. View user information
-bh user
-
-# 3. Create a server (interactive wizard)
-bh servers new --interactive
 ```
 
 Get your API key from [dashboard.bithost.io/api_keys](https://dashboard.bithost.io/api_keys)
 
-## Commands
+## Modes
+
+### Interactive TUI
+
+Launch the full-screen terminal UI for visual server management:
+
+```bash
+bh tui
+```
+
+Features:
+- Dashboard with server list and account balance
+- Create servers with a step-by-step wizard
+- Manage SSH keys
+- Delete servers with confirmation
+- Vim-style navigation (j/k, q to quit)
+
+### Scriptable CLI
+
+Use individual commands for scripting and automation:
+
+```bash
+bh servers list
+bh servers new --name myserver --provider 1 --region 2 --size 5 --image 10
+bh servers delete 123 --force
+```
+
+## CLI Commands
 
 ### Server Management
 
@@ -38,10 +59,7 @@ Get your API key from [dashboard.bithost.io/api_keys](https://dashboard.bithost.
 # List all servers
 bh servers list
 
-# Create a server (interactive wizard)
-bh servers new --interactive
-
-# Create a server (with flags)
+# Create a server
 bh servers new --name myserver --provider 1 --region 2 --size 5 --image 10 --keys 1,2
 
 # Delete a server
