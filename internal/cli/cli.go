@@ -2,104 +2,60 @@ package cli
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 	"time"
 
-	"github.com/fatih/color"
+	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/lipgloss"
 )
 
 var (
-	Green  = color.New(color.FgGreen).SprintFunc()
-	Red    = color.New(color.FgRed).SprintFunc()
-	Yellow = color.New(color.FgYellow).SprintFunc()
-	Cyan   = color.New(color.FgCyan).SprintFunc()
-	Gray   = color.New(color.FgHiBlack).SprintFunc()
-	Bold   = color.New(color.Bold).SprintFunc()
+	Green  = lipgloss.NewStyle().Foreground(lipgloss.Color("2")).Render
+	Red    = lipgloss.NewStyle().Foreground(lipgloss.Color("1")).Render
+	Yellow = lipgloss.NewStyle().Foreground(lipgloss.Color("3")).Render
+	Cyan   = lipgloss.NewStyle().Foreground(lipgloss.Color("6")).Render
+	Gray   = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).Render
+	Bold   = lipgloss.NewStyle().Bold(true).Render
 )
 
-// PrintTable prints data in aligned columns
-// First row is treated as headers (bolded)
 func PrintTable(rows [][]string) {
 	if len(rows) == 0 {
 		return
 	}
 
-	widths := calculateWidths(rows)
-
-	// Print header
-	printRow(rows[0], widths, true)
-	printDivider(widths)
-
-	// Print data rows
-	for _, row := range rows[1:] {
-		printRow(row, widths, false)
-	}
-	fmt.Println()
-}
-
-func calculateWidths(rows [][]string) []int {
-	if len(rows) == 0 {
-		return nil
-	}
 	widths := make([]int, len(rows[0]))
 	for _, row := range rows {
 		for i, col := range row {
-			// Strip ANSI codes to get actual display width
-			visibleLen := len(stripAnsi(col))
-			if i < len(widths) && visibleLen > widths[i] {
-				widths[i] = visibleLen
+			if w := lipgloss.Width(col); i < len(widths) && w > widths[i] {
+				widths[i] = w
 			}
 		}
 	}
-	return widths
-}
 
-func printRow(row []string, widths []int, header bool) {
-	var parts []string
-	for i, col := range row {
-		if i >= len(widths) {
-			break
-		}
-		// Calculate padding based on visible length (without ANSI codes)
-		visibleLen := len(stripAnsi(col))
-		padding := max(widths[i]-visibleLen, 0)
-		padded := col + strings.Repeat(" ", padding)
-
-		if header {
-			parts = append(parts, Bold(padded))
-		} else {
-			parts = append(parts, padded)
-		}
+	columns := make([]table.Column, len(rows[0]))
+	for i, title := range rows[0] {
+		columns[i] = table.Column{Title: title, Width: widths[i]}
 	}
-	fmt.Println(strings.Join(parts, "  "))
-}
 
-func printDivider(widths []int) {
-	total := 0
-	for _, w := range widths {
-		total += w
+	tableRows := make([]table.Row, 0, len(rows)-1)
+	for _, row := range rows[1:] {
+		tableRows = append(tableRows, table.Row(row))
 	}
-	total += (len(widths) - 1) * 2
-	fmt.Println(strings.Repeat("─", total))
+
+	s := table.DefaultStyles()
+	s.Header = lipgloss.NewStyle().Bold(true).Padding(0, 1, 0, 0)
+	s.Cell = lipgloss.NewStyle().Padding(0, 1, 0, 0)
+	s.Selected = s.Cell
+
+	t := table.New(
+		table.WithColumns(columns),
+		table.WithRows(tableRows),
+		table.WithFocused(false),
+		table.WithStyles(s),
+	)
+	fmt.Println(t.View())
 }
 
-// Header returns a bold header
-func Header(text string) string {
-	return Bold(text)
-}
-
-// StepHeader returns a colored step header for wizards
-func StepHeader(step int, text string) string {
-	return Cyan(fmt.Sprintf("Step %d: %s", step, text))
-}
-
-// Divider returns a divider line
-func Divider(length int) string {
-	return strings.Repeat("─", length)
-}
-
-// Truncate truncates a string to maxLen, adding "..." if needed
 func Truncate(s string, maxLen int) string {
 	if len(s) <= maxLen {
 		return s
@@ -107,115 +63,60 @@ func Truncate(s string, maxLen int) string {
 	return s[:maxLen-3] + "..."
 }
 
-// FormatMoney formats a float as currency
 func FormatMoney(amount float64) string {
 	return fmt.Sprintf("$%.2f", amount)
 }
 
-// FormatMemory formats memory value, appending "MB" if no unit is specified
-func FormatMemory(value string) string {
-	// Check if already has a unit (MB, GB, TB, etc.)
-	if hasUnit(value) {
-		return value
-	}
-	return value + " MB"
-}
+func FormatMemory(v string) string  { return formatWithUnit(v, "MB") }
+func FormatStorage(v string) string { return formatWithUnit(v, "GB") }
 
-// FormatStorage formats storage value, appending "GB" if no unit is specified
-func FormatStorage(value string) string {
-	// Check if already has a unit (MB, GB, TB, etc.)
-	if hasUnit(value) {
-		return value
-	}
-	return value + " GB"
-}
-
-// hasUnit checks if a string already has a unit suffix (MB, GB, TB, PB, etc.)
-func hasUnit(value string) bool {
-	value = strings.ToUpper(strings.TrimSpace(value))
-	units := []string{"B", "KB", "MB", "GB", "TB", "PB"}
-	for _, unit := range units {
-		if strings.HasSuffix(value, unit) {
-			return true
+func formatWithUnit(v, unit string) string {
+	u := strings.ToUpper(strings.TrimSpace(v))
+	for _, s := range []string{"B", "KB", "MB", "GB", "TB", "PB"} {
+		if strings.HasSuffix(u, s) {
+			return v
 		}
 	}
-	return false
+	return v + " " + unit
 }
 
-// FormatEnabled returns colored "Enabled" or "Disabled"
-func FormatEnabled(enabled bool) string {
-	if enabled {
-		return Green("Enabled")
-	}
-	return "Disabled"
-}
-
-// ShowProgress displays a spinner with a message
-// Returns a stop function (shows checkmark) and cancel function (clears line)
-func ShowProgress(message string) (stop func(), cancel func()) {
-	done := make(chan bool)
-	clear := make(chan bool)
+func ShowProgress(message string) (stop, cancel func()) {
+	done, clear := make(chan bool), make(chan bool)
 
 	go func() {
 		frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
-		i := 0
-		for {
+		for i := 0; ; i = (i + 1) % len(frames) {
 			select {
 			case <-done:
 				fmt.Printf("\r%s %s\n", Green("✓"), message)
 				return
 			case <-clear:
-				fmt.Printf("\r\033[K") // Clear line
+				fmt.Print("\r\033[K")
 				return
 			default:
 				fmt.Printf("\r%s %s", frames[i], message)
-				i = (i + 1) % len(frames)
 				time.Sleep(100 * time.Millisecond)
 			}
 		}
 	}()
 
-	stopFn := func() {
-		done <- true
-		time.Sleep(200 * time.Millisecond)
+	wait := func(ch chan bool) func() {
+		return func() { ch <- true; time.Sleep(200 * time.Millisecond) }
 	}
-
-	cancelFn := func() {
-		clear <- true
-		time.Sleep(200 * time.Millisecond)
-	}
-
-	return stopFn, cancelFn
+	return wait(done), wait(clear)
 }
 
-// ansiRegex matches ANSI escape codes
-var ansiRegex = regexp.MustCompile(`\x1b\[[0-9;]*m`)
-
-// stripAnsi removes ANSI escape codes from a string
-func stripAnsi(s string) string {
-	return ansiRegex.ReplaceAllString(s, "")
-}
-
-// Paginator provides pagination information
 type Paginator interface {
 	GetPage() int
 	HasPrevious() bool
 	HasNext() bool
 }
 
-// DisplayPagination shows pagination information if metadata is available
 func DisplayPagination(p Paginator) {
-	// Don't show pagination info if we're on page 1 and there's no next page
 	if p.GetPage() == 1 && !p.HasNext() {
 		return
 	}
 
-	fmt.Println()
-
-	// Show current page
-	fmt.Printf("Page %d", p.GetPage())
-
-	// Show navigation hints
 	var hints []string
 	if p.HasPrevious() {
 		hints = append(hints, Gray(fmt.Sprintf("--page %d for previous", p.GetPage()-1)))
@@ -224,9 +125,10 @@ func DisplayPagination(p Paginator) {
 		hints = append(hints, Gray(fmt.Sprintf("--page %d for next", p.GetPage()+1)))
 	}
 
-	if len(hints) > 0 {
-		fmt.Printf(" (%s)", strings.Join(hints, ", "))
-	}
-
 	fmt.Println()
+	if len(hints) > 0 {
+		fmt.Printf("Page %d (%s)\n", p.GetPage(), strings.Join(hints, ", "))
+	} else {
+		fmt.Printf("Page %d\n", p.GetPage())
+	}
 }
