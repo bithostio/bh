@@ -113,6 +113,11 @@ func (m wizardModel) SetSSHKeys(keys []api.SSHKey) wizardModel {
 	return m
 }
 
+func (m wizardModel) SetLoading(loading bool) wizardModel {
+	m.loading = loading
+	return m
+}
+
 func (m wizardModel) SetSize(width, height int) wizardModel {
 	m.width = width
 	m.height = height

@@ -354,6 +354,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.view == viewSSHKeys && m.sshkeys.adding {
 			m.sshkeys = m.sshkeys.SetAddError(msg.err.Error())
 		}
+
+		// Handle wizard errors
+		if m.view == viewWizard {
+			m.wizard = m.wizard.SetLoading(false)
+		}
 	}
 
 	return m, tea.Batch(cmds...)
@@ -377,9 +382,7 @@ func (m Model) View() string {
 		content = m.detail.View()
 	case viewWizard:
 		content = m.wizard.View()
-		if m.status != "" {
-			content += "\n" + pendingStyle.Render(m.status)
-		}
+		content += m.renderStatusBar()
 	case viewSSHKeys:
 		content = m.sshkeys.View()
 		content += m.renderStatusBar()
