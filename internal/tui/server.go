@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/bithostio/bh/internal/api"
 )
 
@@ -41,6 +42,12 @@ func (m serverDetailModel) View() string {
 		b.WriteString(m.renderField("Message", m.server.Message))
 	}
 
+	// SSH command
+	if m.server.IPAddress != "" {
+		b.WriteString("\n")
+		b.WriteString(m.renderField("SSH", m.sshCommand()))
+	}
+
 	// Help
 	b.WriteString("\n\n")
 	b.WriteString(DetailHelp())
@@ -59,4 +66,12 @@ func formatIP(ip string) string {
 		return subtleStyle.Render("-")
 	}
 	return ip
+}
+
+func (m serverDetailModel) sshCommand() string {
+	return fmt.Sprintf("ssh root@%s", m.server.IPAddress)
+}
+
+func (m serverDetailModel) CopySSHCommand() error {
+	return clipboard.WriteAll(m.sshCommand())
 }

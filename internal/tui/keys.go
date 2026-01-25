@@ -7,7 +7,7 @@ func DashboardHelp() string {
 
 // DetailHelp returns help for server detail view
 func DetailHelp() string {
-	return helpStyle.Render("d: delete • q/esc: back")
+	return helpStyle.Render("c: copy ssh • d: delete • q/esc: back")
 }
 
 // WizardHelp returns help for the wizard

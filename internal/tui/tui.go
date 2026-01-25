@@ -208,6 +208,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					fmt.Sprintf("Delete server '%s'?", m.detail.server.Name),
 					m.detail.server.ID,
 				)
+			case "c":
+				if m.detail.server.IPAddress != "" {
+					if err := m.detail.CopySSHCommand(); err == nil {
+						m.status = "SSH command copied to clipboard"
+						m.statusAt = time.Now()
+					}
+				}
 			}
 
 		case viewWizard:
@@ -380,6 +387,7 @@ func (m Model) View() string {
 		content += m.renderStatusBar()
 	case viewServerDetail:
 		content = m.detail.View()
+		content += m.renderStatusBar()
 	case viewWizard:
 		content = m.wizard.View()
 		content += m.renderStatusBar()
