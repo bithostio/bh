@@ -1,24 +1,5 @@
 package api
 
-import "encoding/json"
-
-// BoolFromInt handles JSON fields that may be bool or int (0/1)
-type BoolFromInt bool
-
-func (b *BoolFromInt) UnmarshalJSON(data []byte) error {
-	var boolVal bool
-	if err := json.Unmarshal(data, &boolVal); err == nil {
-		*b = BoolFromInt(boolVal)
-		return nil
-	}
-	var intVal int
-	if err := json.Unmarshal(data, &intVal); err == nil {
-		*b = BoolFromInt(intVal != 0)
-		return nil
-	}
-	return nil
-}
-
 // ErrorResponse represents the error response from the API
 type ErrorResponse struct {
 	Errors []string `json:"errors"`
@@ -102,7 +83,7 @@ type Image struct {
 	ID           int         `json:"id"`
 	Name         string      `json:"name"`
 	Distribution string      `json:"distribution"`
-	Windows      BoolFromInt `json:"windows"`
+	Windows      bool        `json:"windows"`
 	Architecture string      `json:"architecture"`
 }
 
