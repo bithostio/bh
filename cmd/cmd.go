@@ -13,7 +13,7 @@ var rootCmd = &cobra.Command{
 	Short: "Bithost.io CLI - create and manage cloud servers",
 	Long: `Bithost.io CLI - create and manage cloud servers.
 
-Run 'bh tui' for interactive mode, or 'bh auth' to get started.`,
+Run 'bh manage' for interactive mode, or 'bh auth' to get started.`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
 }

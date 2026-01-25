@@ -31,7 +31,7 @@ Get your API key from [dashboard.bithost.io/api_keys](https://dashboard.bithost.
 Launch the full-screen terminal UI for visual server management:
 
 ```bash
-bh tui
+bh manage
 ```
 
 Features:
