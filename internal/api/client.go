@@ -157,6 +157,10 @@ func (c *Client) do(method, path string, body any, result any) error {
 		return c.handleErrorResponse(resp)
 	}
 
+	if result == nil {
+		return nil
+	}
+
 	return json.NewDecoder(resp.Body).Decode(result)
 }
 
