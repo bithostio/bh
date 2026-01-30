@@ -487,9 +487,9 @@ func (m Model) fetchProviders() tea.Cmd {
 	}
 }
 
-func (m Model) fetchRegions(providerID int) tea.Cmd {
+func (m Model) fetchRegions(provider string) tea.Cmd {
 	return func() tea.Msg {
-		resp, err := m.client.ListRegions(providerID, 0)
+		resp, err := m.client.ListRegions(provider, 0)
 		if err != nil {
 			return errMsg{err}
 		}
@@ -497,9 +497,9 @@ func (m Model) fetchRegions(providerID int) tea.Cmd {
 	}
 }
 
-func (m Model) fetchSizes(regionID, providerID int) tea.Cmd {
+func (m Model) fetchSizes(regionID int, provider string) tea.Cmd {
 	return func() tea.Msg {
-		resp, err := m.client.ListSizes(regionID, providerID, 0)
+		resp, err := m.client.ListSizes(regionID, provider, 0)
 		if err != nil {
 			return errMsg{err}
 		}
@@ -507,9 +507,9 @@ func (m Model) fetchSizes(regionID, providerID int) tea.Cmd {
 	}
 }
 
-func (m Model) fetchImages(providerID int) tea.Cmd {
+func (m Model) fetchImages(provider string) tea.Cmd {
 	return func() tea.Msg {
-		resp, err := m.client.ListImages(providerID, "x86", 0)
+		resp, err := m.client.ListImages(provider, "x86", 0)
 		if err != nil {
 			return errMsg{err}
 		}

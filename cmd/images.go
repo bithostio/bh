@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	imagesProviderID   int
+	imagesProvider     string
 	imagesArchitecture string
 	imagesPage         int
 )
@@ -24,7 +24,7 @@ var imagesCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(imagesCmd)
-	imagesCmd.Flags().IntVarP(&imagesProviderID, "provider", "p", 0, "Provider ID (required)")
+	imagesCmd.Flags().StringVarP(&imagesProvider, "provider", "p", "", "Provider slug (required)")
 	imagesCmd.Flags().StringVarP(&imagesArchitecture, "arch", "a", "x86", "Architecture (x86 or arm)")
 	imagesCmd.Flags().IntVar(&imagesPage, "page", 0, "Page number (optional)")
 	_ = imagesCmd.MarkFlagRequired("provider")
@@ -38,7 +38,7 @@ func runImages(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	resp, err := client.ListImages(imagesProviderID, imagesArchitecture, imagesPage)
+	resp, err := client.ListImages(imagesProvider, imagesArchitecture, imagesPage)
 	if err != nil {
 		return err
 	}

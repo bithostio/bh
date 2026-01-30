@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	regionsProviderID int
-	regionsPage       int
+	regionsProvider string
+	regionsPage     int
 )
 
 var regionsCmd = &cobra.Command{
@@ -23,7 +23,7 @@ var regionsCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(regionsCmd)
-	regionsCmd.Flags().IntVarP(&regionsProviderID, "provider", "p", 0, "Provider ID (required)")
+	regionsCmd.Flags().StringVarP(&regionsProvider, "provider", "p", "", "Provider slug (required)")
 	regionsCmd.Flags().IntVar(&regionsPage, "page", 0, "Page number (optional)")
 	_ = regionsCmd.MarkFlagRequired("provider")
 }
@@ -36,7 +36,7 @@ func runRegions(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	resp, err := client.ListRegions(regionsProviderID, regionsPage)
+	resp, err := client.ListRegions(regionsProvider, regionsPage)
 	if err != nil {
 		return err
 	}

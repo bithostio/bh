@@ -33,7 +33,7 @@ func (m serverDetailModel) View() string {
 	b.WriteString(m.renderField("IP Address", formatIP(m.server.IPAddress)))
 	b.WriteString(m.renderField("Private IP", formatIP(m.server.PrivateIPAddress)))
 	b.WriteString(m.renderField("IPv6", formatIP(m.server.IPAddressV6)))
-	b.WriteString(m.renderField("Provider ID", fmt.Sprintf("%d", m.server.ProviderID)))
+	b.WriteString(m.renderField("Provider", m.server.Provider))
 	b.WriteString(m.renderField("Cost So Far", FormatMoney(m.server.CostSoFar)))
 	b.WriteString(m.renderField("Backups", FormatEnabled(m.server.BackupsEnabled)))
 

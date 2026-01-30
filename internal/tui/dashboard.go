@@ -170,7 +170,7 @@ func (m dashboardModel) renderServerLine(server api.Server, selected bool) strin
 	ip = padRight(ip, 16)
 	status := FormatStatus(server.Status, server.Pending, server.Power)
 	cost := FormatMoney(server.CostSoFar)
-	provider := fmt.Sprintf("%d", server.ProviderID)
+	provider := server.Provider
 
 	// Build line
 	var prefix string

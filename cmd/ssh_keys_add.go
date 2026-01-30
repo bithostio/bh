@@ -12,10 +12,10 @@ import (
 )
 
 var (
-	keyLabel      string
-	keyFile       string
-	keyContent    string
-	keyProviderID int
+	keyLabel    string
+	keyFile     string
+	keyContent  string
+	keyProvider string
 )
 
 var sshKeysAddCmd = &cobra.Command{
@@ -41,7 +41,7 @@ func init() {
 	sshKeysAddCmd.Flags().StringVarP(&keyLabel, "label", "l", "", "Label for the SSH key")
 	sshKeysAddCmd.Flags().StringVarP(&keyFile, "file", "f", "", "Path to SSH public key file")
 	sshKeysAddCmd.Flags().StringVarP(&keyContent, "key", "k", "", "SSH public key content")
-	sshKeysAddCmd.Flags().IntVarP(&keyProviderID, "provider", "p", 1, "Provider ID (default: 1)")
+	sshKeysAddCmd.Flags().StringVarP(&keyProvider, "provider", "p", "digital_ocean", "Provider slug (default: digital_ocean)")
 }
 
 func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
@@ -106,9 +106,9 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 	stop, cancel := cli.ShowProgress("Adding SSH key...")
 
 	req := &api.CreateSSHKeyRequest{
-		Label:      label,
-		Key:        publicKey,
-		ProviderID: keyProviderID,
+		Label:    label,
+		Key:      publicKey,
+		Provider: keyProvider,
 	}
 
 	key, err := client.CreateSSHKey(req)

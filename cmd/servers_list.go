@@ -88,7 +88,7 @@ func displayServers(servers []api.Server, showAll bool) {
 			formatServerStatus(server),
 			ipAddr,
 			cli.FormatMoney(server.CostSoFar),
-			strconv.Itoa(server.ProviderID),
+			server.Provider,
 		})
 	}
 

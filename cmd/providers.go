@@ -2,11 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/bithostio/bh/internal/api"
-	"github.com/bithostio/bh/internal/config"
 	"github.com/bithostio/bh/internal/cli"
+	"github.com/bithostio/bh/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -42,12 +41,12 @@ func runProviders(cmd *cobra.Command, args []string) error {
 	}
 
 	rows := [][]string{
-		{"ID", "Name"},
+		{"Slug", "Name"},
 	}
 
 	for _, provider := range resp.Providers {
 		rows = append(rows, []string{
-			strconv.Itoa(provider.ID),
+			provider.Slug,
 			provider.Name,
 		})
 	}

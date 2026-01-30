@@ -11,7 +11,7 @@ import (
 
 var (
 	serverName     string
-	providerID     int
+	provider       string
 	regionID       int
 	sizeID         int
 	imageID        int
@@ -27,13 +27,13 @@ var serverNewCmd = &cobra.Command{
 For interactive server creation, run 'bh' without arguments to launch the TUI.
 
 Usage:
-  bh servers new --name myserver --provider 1 --region 2 --size 5 --image 10 --keys 1,2
+  bh servers new --name myserver --provider digital_ocean --region 2 --size 5 --image 10 --keys 1,2
 
 List available resources:
   bh providers
-  bh regions --provider 1
-  bh sizes --provider 1 --region 2
-  bh images --provider 1
+  bh regions --provider digital_ocean
+  bh sizes --provider digital_ocean --region 2
+  bh images --provider digital_ocean
   bh ssh-keys`,
 	RunE: runServerNew,
 }
@@ -42,7 +42,7 @@ func init() {
 	serverCmd.AddCommand(serverNewCmd)
 
 	serverNewCmd.Flags().StringVarP(&serverName, "name", "n", "", "Server name")
-	serverNewCmd.Flags().IntVarP(&providerID, "provider", "p", 0, "Provider ID")
+	serverNewCmd.Flags().StringVarP(&provider, "provider", "p", "", "Provider slug")
 	serverNewCmd.Flags().IntVarP(&regionID, "region", "r", 0, "Region ID")
 	serverNewCmd.Flags().IntVarP(&sizeID, "size", "s", 0, "Size/plan ID")
 	serverNewCmd.Flags().IntVarP(&imageID, "image", "m", 0, "Image/OS ID")
@@ -61,7 +61,7 @@ func runServerNew(cmd *cobra.Command, args []string) error {
 	if serverName == "" {
 		return fmt.Errorf("--name is required (or run 'bh' for interactive mode)")
 	}
-	if providerID == 0 {
+	if provider == "" {
 		return fmt.Errorf("--provider is required (or run 'bh' for interactive mode)")
 	}
 	if regionID == 0 {
@@ -77,10 +77,10 @@ func runServerNew(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("--keys is required (or run 'bh' for interactive mode)")
 	}
 
-	return createServer(client, serverName, providerID, regionID, sizeID, imageID, sshKeyIDs, backupsEnabled)
+	return createServer(client, serverName, provider, regionID, sizeID, imageID, sshKeyIDs, backupsEnabled)
 }
 
-func createServer(client *api.Client, name string, providerID, regionID, sizeID, imageID int, keyIDs []int, backups bool) error {
+func createServer(client *api.Client, name string, provider string, regionID, sizeID, imageID int, keyIDs []int, backups bool) error {
 	stop, cancel := cli.ShowProgress("Creating server...")
 
 	req := &api.CreateServerRequest{
@@ -88,7 +88,7 @@ func createServer(client *api.Client, name string, providerID, regionID, sizeID,
 		SizeID:         sizeID,
 		RegionID:       regionID,
 		ImageID:        imageID,
-		ProviderID:     providerID,
+		Provider:       provider,
 		KeyIDs:         keyIDs,
 		BackupsEnabled: backups,
 		Terms:          true,

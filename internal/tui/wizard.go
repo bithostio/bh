@@ -250,7 +250,7 @@ func (m wizardModel) Update(msg tea.KeyMsg, root Model) (wizardModel, tea.Cmd) {
 				m.regions = nil
 				m.sizes = nil
 				m.images = nil
-				cmds = append(cmds, root.fetchRegions(m.selectedProvider.ID))
+				cmds = append(cmds, root.fetchRegions(m.selectedProvider.Slug))
 			}
 		case stepRegion:
 			if m.cursor < len(m.regions) {
@@ -261,7 +261,7 @@ func (m wizardModel) Update(msg tea.KeyMsg, root Model) (wizardModel, tea.Cmd) {
 				// Clear dependent selections
 				m.selectedSize = nil
 				m.sizes = nil
-				cmds = append(cmds, root.fetchSizes(m.selectedRegion.ID, m.selectedProvider.ID))
+				cmds = append(cmds, root.fetchSizes(m.selectedRegion.ID, m.selectedProvider.Slug))
 			}
 		case stepSize:
 			if m.cursor < len(m.sizes) {
@@ -269,7 +269,7 @@ func (m wizardModel) Update(msg tea.KeyMsg, root Model) (wizardModel, tea.Cmd) {
 				m.step++
 				m.loading = true
 				m.cursor = 0
-				cmds = append(cmds, root.fetchImages(m.selectedProvider.ID))
+				cmds = append(cmds, root.fetchImages(m.selectedProvider.Slug))
 			}
 		case stepImage:
 			if m.cursor < len(m.images) {
@@ -291,7 +291,7 @@ func (m wizardModel) Update(msg tea.KeyMsg, root Model) (wizardModel, tea.Cmd) {
 			// Create server
 			req := &api.CreateServerRequest{
 				Name:           m.serverName,
-				ProviderID:     m.selectedProvider.ID,
+				Provider:       m.selectedProvider.Slug,
 				RegionID:       m.selectedRegion.ID,
 				SizeID:         m.selectedSize.ID,
 				ImageID:        m.selectedImage.ID,

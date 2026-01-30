@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	sizesProviderID int
-	sizesRegionID   int
-	sizesPage       int
+	sizesProvider string
+	sizesRegionID int
+	sizesPage     int
 )
 
 var sizesCmd = &cobra.Command{
@@ -24,7 +24,7 @@ var sizesCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(sizesCmd)
-	sizesCmd.Flags().IntVarP(&sizesProviderID, "provider", "p", 0, "Provider ID (required)")
+	sizesCmd.Flags().StringVarP(&sizesProvider, "provider", "p", "", "Provider slug (required)")
 	sizesCmd.Flags().IntVarP(&sizesRegionID, "region", "r", 0, "Region ID (required)")
 	sizesCmd.Flags().IntVar(&sizesPage, "page", 0, "Page number (optional)")
 	_ = sizesCmd.MarkFlagRequired("provider")
@@ -39,7 +39,7 @@ func runSizes(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	resp, err := client.ListSizes(sizesRegionID, sizesProviderID, sizesPage)
+	resp, err := client.ListSizes(sizesRegionID, sizesProvider, sizesPage)
 	if err != nil {
 		return err
 	}
