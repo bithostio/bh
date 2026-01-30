@@ -62,33 +62,33 @@ func (c *Client) ListProviders(page int) (*ProvidersResponse, error) {
 }
 
 // ListRegions retrieves regions for a provider
-func (c *Client) ListRegions(providerID, page int) (*RegionsResponse, error) {
+func (c *Client) ListRegions(provider string, page int) (*RegionsResponse, error) {
 	var resp RegionsResponse
-	path := fmt.Sprintf("regions?provider_id=%d", providerID)
+	path := fmt.Sprintf("regions?provider=%s", provider)
 	if page > 0 {
-		path = fmt.Sprintf("regions?provider_id=%d&page=%d", providerID, page)
+		path = fmt.Sprintf("regions?provider=%s&page=%d", provider, page)
 	}
 	err := c.do("GET", path, nil, &resp)
 	return &resp, err
 }
 
 // ListSizes retrieves available server sizes
-func (c *Client) ListSizes(regionID, providerID, page int) (*SizesResponse, error) {
+func (c *Client) ListSizes(regionID int, provider string, page int) (*SizesResponse, error) {
 	var resp SizesResponse
-	path := fmt.Sprintf("sizes?region_id=%d&provider_id=%d", regionID, providerID)
+	path := fmt.Sprintf("sizes?region_id=%d&provider=%s", regionID, provider)
 	if page > 0 {
-		path = fmt.Sprintf("sizes?region_id=%d&provider_id=%d&page=%d", regionID, providerID, page)
+		path = fmt.Sprintf("sizes?region_id=%d&provider=%s&page=%d", regionID, provider, page)
 	}
 	err := c.do("GET", path, nil, &resp)
 	return &resp, err
 }
 
 // ListImages retrieves available OS images
-func (c *Client) ListImages(providerID int, architecture string, page int) (*ImagesResponse, error) {
+func (c *Client) ListImages(provider string, architecture string, page int) (*ImagesResponse, error) {
 	var resp ImagesResponse
-	path := fmt.Sprintf("images?provider_id=%d&architecture=%s&type=STANDARD", providerID, architecture)
+	path := fmt.Sprintf("images?provider=%s&architecture=%s&type=STANDARD", provider, architecture)
 	if page > 0 {
-		path = fmt.Sprintf("images?provider_id=%d&architecture=%s&type=STANDARD&page=%d", providerID, architecture, page)
+		path = fmt.Sprintf("images?provider=%s&architecture=%s&type=STANDARD&page=%d", provider, architecture, page)
 	}
 	err := c.do("GET", path, nil, &resp)
 	return &resp, err
@@ -113,7 +113,7 @@ func (c *Client) CreateSSHKey(req *CreateSSHKeyRequest) (*SSHKey, error) {
 			"label": req.Label,
 			"key":   req.Key,
 		},
-		"provider_id": req.ProviderID,
+		"provider": req.Provider,
 	}
 
 	var resp KeyResponse

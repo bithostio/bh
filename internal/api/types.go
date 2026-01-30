@@ -44,13 +44,14 @@ type Server struct {
 	PrivateIPAddress   string  `json:"private_ip_address"`
 	IPAddressV6        string  `json:"ip_address_v6"`
 	PrivateIPAddressV6 string  `json:"private_ip_address_v6"`
-	ProviderID         int     `json:"provider_id"`
+	Provider           string  `json:"provider"`
 }
 
 // Provider represents a cloud provider
 type Provider struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
+	Slug string `json:"slug"`
 }
 
 // Region represents a geographic region
@@ -100,7 +101,7 @@ type CreateServerRequest struct {
 	SizeID         int    `json:"size_id"`
 	RegionID       int    `json:"region_id"`
 	ImageID        int    `json:"image_id"`
-	ProviderID     int    `json:"provider_id"`
+	Provider       string `json:"provider"`
 	KeyIDs         []int  `json:"key_ids"`
 	BackupsEnabled bool   `json:"backups_enabled"`
 	Terms          bool   `json:"terms"`
@@ -108,9 +109,9 @@ type CreateServerRequest struct {
 
 // CreateSSHKeyRequest represents the request to create an SSH key
 type CreateSSHKeyRequest struct {
-	Label      string `json:"label"`
-	Key        string `json:"key"`
-	ProviderID int    `json:"provider_id,omitempty"`
+	Label    string `json:"label"`
+	Key      string `json:"key"`
+	Provider string `json:"provider,omitempty"`
 }
 
 // Response wrappers for API responses
