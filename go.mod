@@ -8,6 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/huh v0.8.0
 	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/gsamokovarov/assert v0.0.0-20180414063448-8cd8ab63a335
 	github.com/spf13/cobra v1.10.1
 )
 
