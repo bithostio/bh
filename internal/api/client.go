@@ -9,6 +9,9 @@ import (
 	"time"
 )
 
+// HTTPTransport can be set to override the default transport (used for testing)
+var HTTPTransport http.RoundTripper
+
 // Client represents the API client
 type Client struct {
 	BaseURL    string
@@ -18,12 +21,16 @@ type Client struct {
 
 // NewClient creates a new API client
 func NewClient(baseURL, apiKey string) *Client {
+	httpClient := &http.Client{Timeout: 30 * time.Second}
+
+	if HTTPTransport != nil {
+		httpClient.Transport = HTTPTransport
+	}
+
 	return &Client{
-		BaseURL: baseURL,
-		APIKey:  apiKey,
-		HTTPClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
+		BaseURL:    baseURL,
+		APIKey:     apiKey,
+		HTTPClient: httpClient,
 	}
 }
 
