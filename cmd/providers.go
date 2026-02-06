@@ -52,7 +52,6 @@ func runProviders(cmd *cobra.Command, args []string) error {
 	}
 
 	cli.PrintTable(rows)
-	cli.DisplayPagination(resp.Meta.Pagination)
 
 	return nil
 }
