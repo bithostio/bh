@@ -1,10 +1,41 @@
 package cli
 
 import (
+	"bytes"
+	"io"
+	"os"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/gsamokovarov/assert"
 )
+
+func captureOutput(fn func()) string {
+	r, w, err := os.Pipe()
+	if err != nil {
+		panic("failed to create pipe: " + err.Error())
+	}
+
+	old := os.Stdout
+	defer func() { os.Stdout = old }()
+
+	os.Stdout = w
+	fn()
+	w.Close()
+
+	var buf bytes.Buffer
+	io.Copy(&buf, r)
+	r.Close()
+
+	return buf.String()
+}
+
+var ansiRe = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
+func stripANSI(s string) string {
+	return ansiRe.ReplaceAllString(s, "")
+}
 
 func TestTruncate(t *testing.T) {
 	t.Run("shorter than max", func(t *testing.T) {
@@ -57,6 +88,52 @@ func TestFormatMemory(t *testing.T) {
 
 	t.Run("case insensitive check", func(t *testing.T) {
 		assert.Equal(t, "512 mb", FormatMemory("512 mb"))
+	})
+}
+
+func TestPrintTable(t *testing.T) {
+	t.Run("shows all rows", func(t *testing.T) {
+		rows := [][]string{
+			{"Slug", "Name"},
+			{"digital_ocean", "DigitalOcean"},
+			{"packet", "Packet"},
+			{"linode", "Linode"},
+			{"hetzner", "Hetzner"},
+			{"vultr", "Vultr"},
+		}
+
+		output := captureOutput(func() {
+			PrintTable(rows)
+		})
+
+		cleaned := stripANSI(output)
+
+		for _, row := range rows {
+			for _, cell := range row {
+				assert.True(t, strings.Contains(cleaned, cell))
+			}
+		}
+	})
+
+	t.Run("empty input", func(t *testing.T) {
+		output := captureOutput(func() {
+			PrintTable(nil)
+		})
+
+		assert.Equal(t, "", output)
+	})
+
+	t.Run("header only", func(t *testing.T) {
+		rows := [][]string{
+			{"Name", "Value"},
+		}
+
+		output := captureOutput(func() {
+			PrintTable(rows)
+		})
+
+		cleaned := stripANSI(output)
+		assert.True(t, strings.Contains(cleaned, "Name"))
 	})
 }
 
