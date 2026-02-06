@@ -52,7 +52,7 @@ func PrintTable(rows [][]string) {
 		table.WithRows(tableRows),
 		table.WithFocused(false),
 		table.WithStyles(s),
-		table.WithHeight(len(tableRows)),
+		table.WithHeight(len(tableRows)+1),
 	)
 	fmt.Println(t.View())
 }
