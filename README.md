@@ -1,6 +1,6 @@
 # bh - Bithost.io CLI
 
-Official command-line interface for Bithost.io.
+Official command-line interface for [Bithost.io](https://bithost.io).
 
 ## Installation
 
@@ -22,7 +22,7 @@ go install github.com/bithostio/bh@latest
 bh auth
 ```
 
-Get your API key from [dashboard.bithost.io/api_keys](https://dashboard.bithost.io/api_keys)
+Get your API key from [dashboard.bithost.io/api_keys](https://dashboard.bithost.io/api_keys).
 
 ## Modes
 
@@ -39,6 +39,8 @@ Features:
 - Create servers with a step-by-step wizard
 - Manage SSH keys
 - Delete servers with confirmation
+- Copy SSH commands to clipboard
+- Auto-refresh server status
 - Vim-style navigation (j/k, q to quit)
 
 ### Scriptable CLI
@@ -47,41 +49,64 @@ Use individual commands for scripting and automation:
 
 ```bash
 bh servers list
-bh servers new --name myserver --provider 1 --region 2 --size 5 --image 10
+bh servers new --name myserver --provider digital_ocean --region 2 --size 5 --image 10 --keys 1,2
 bh servers delete 123 --force
 ```
+
+## Provider Slugs
+
+Providers are identified by slug strings (e.g., `digital_ocean`) rather than numeric
+IDs. Use `bh providers` to list available provider slugs:
+
+```bash
+$ bh providers
+Slug            Name
+digital_ocean   DigitalOcean
+...
+```
+
+The `--provider` flag on commands like `regions`, `sizes`, `images`, and `servers new`
+accepts these slugs.
 
 ## CLI Commands
 
 ### Server Management
 
 ```bash
-# List all servers
+# List active servers
 bh servers list
 
-# Create a server
-bh servers new --name myserver --provider 1 --region 2 --size 5 --image 10 --keys 1,2
+# List all servers including failed
+bh servers list --all
 
-# Delete a server
+# Create a server
+bh servers new --name myserver --provider digital_ocean --region 2 --size 5 --image 10 --keys 1,2
+
+# Create a server with backups enabled
+bh servers new --name myserver --provider digital_ocean --region 2 --size 5 --image 10 --keys 1,2 --backups
+
+# Delete a server (with confirmation prompt)
 bh servers delete <id>
-bh servers delete <id> --force  # skip confirmation
+
+# Delete a server without confirmation
+bh servers delete <id> --force
 ```
 
-### Resource Listing
+### Resource Discovery
 
 ```bash
-# List providers
+# List available providers (shows slugs)
 bh providers
 
 # List regions for a provider
-bh regions --provider <provider-id>
+bh regions --provider digital_ocean
 
 # List sizes/plans for a region
-bh sizes --provider <provider-id> --region <region-id>
+bh sizes --provider digital_ocean --region <region-id>
 
 # List OS images
-bh images --provider <provider-id>
-bh images --provider <provider-id> --arch arm  # filter by architecture
+bh images --provider digital_ocean
+bh images --provider digital_ocean --arch arm  # filter by architecture (default: x86)
 ```
 
 ### SSH Key Management
@@ -90,14 +115,17 @@ bh images --provider <provider-id> --arch arm  # filter by architecture
 # List SSH keys
 bh ssh-keys list
 
-# Add SSH key (interactive)
+# Add SSH key (interactive prompts)
 bh ssh-keys add
 
 # Add SSH key from file
-bh ssh-keys add --file ~/.ssh/id_rsa.pub --label "my-key" --provider 1
+bh ssh-keys add --label "my-key" --file ~/.ssh/id_rsa.pub
 
 # Add SSH key directly
-bh ssh-keys add --key "ssh-rsa AAAA..." --label "my-key" --provider 1
+bh ssh-keys add --label "my-key" --key "ssh-rsa AAAA..."
+
+# Add SSH key for a specific provider (default: digital_ocean)
+bh ssh-keys add --label "my-key" --file ~/.ssh/id_rsa.pub --provider digital_ocean
 ```
 
 ### Account
