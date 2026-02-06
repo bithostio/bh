@@ -161,7 +161,7 @@ Environment variables (optional overrides):
 
 **"No SSH keys found"** - Add keys with `bh ssh-keys add` or at [dashboard.bithost.io/keys](https://dashboard.bithost.io/keys)
 
-**Low balance** - Top up at [dashboard.bithost.io/billing](https://dashboard.bithost.io/billing)
+**Low balance** - Top up at [dashboard.bithost.io](https://dashboard.bithost.io)
 
 ## Development
 
