@@ -103,8 +103,12 @@ func (m dashboardModel) renderHeader() string {
 	var right string
 	if m.user != nil {
 		balance := fmt.Sprintf("Balance: %s", FormatMoney(m.user.Balance))
-		serverCount := fmt.Sprintf("Servers: %d/%d", len(m.servers), m.user.ServerLimit)
-		right = subtleStyle.Render(balance + "  " + serverCount)
+		if m.user.ServerLimit > 0 {
+			serverCount := fmt.Sprintf("Servers: %d/%d", len(m.servers), m.user.ServerLimit)
+			right = subtleStyle.Render(balance + "  " + serverCount)
+		} else {
+			right = subtleStyle.Render(balance)
+		}
 	}
 
 	// Calculate spacing (ensure at least 1 space, never negative)

@@ -234,6 +234,25 @@ func TestUserCommand(t *testing.T) {
 		assert.True(t, strings.Contains(output, "10"))
 	})
 
+	t.Run("hides server limit when zero", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.UserResponse{
+					FullName:    "Admin User",
+					Email:       "admin@example.com",
+					Balance:     100.00,
+					ServerLimit: 0,
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("user")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "Admin User"))
+		assert.True(t, !strings.Contains(output, "Server Limit"))
+	})
+
 	t.Run("handles API error", func(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {

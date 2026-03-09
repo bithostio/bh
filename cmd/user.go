@@ -42,7 +42,9 @@ func displayUser(user *api.UserResponse) {
 
 	fmt.Printf("\nAccount: %s (%s)\n", cli.Bold(user.FullName), user.Email)
 	fmt.Printf("Balance: %s\n", cli.Bold(fmt.Sprintf("$%.2f", user.Balance)))
-	fmt.Printf("Server Limit: %s\n", cli.Bold(fmt.Sprintf("%d", user.ServerLimit)))
+	if user.ServerLimit > 0 {
+		fmt.Printf("Server Limit: %s\n", cli.Bold(fmt.Sprintf("%d", user.ServerLimit)))
+	}
 
 	if user.Balance < threshold {
 		fmt.Printf("\n%s Your balance is low!\n", cli.Yellow("Warning:"))
