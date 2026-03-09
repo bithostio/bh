@@ -1,6 +1,9 @@
 package api
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // APIError represents an error returned by the API
 type APIError struct {
@@ -11,7 +14,7 @@ type APIError struct {
 func (e *APIError) Error() string {
 	switch e.StatusCode {
 	case 401:
-		return "Authentication failed. Please run 'bh auth' to configure your API key."
+		return "Authentication failed. Check your API key."
 	case 403:
 		return "Permission denied. Check your API key permissions."
 	case 404:
@@ -29,4 +32,10 @@ func (e *APIError) Error() string {
 		}
 		return fmt.Sprintf("API error: status %d", e.StatusCode)
 	}
+}
+
+// IsAuthError reports whether the error is an API authentication (401) error.
+func IsAuthError(err error) bool {
+	var apiErr *APIError
+	return errors.As(err, &apiErr) && apiErr.StatusCode == 401
 }

@@ -22,7 +22,7 @@ go install github.com/bithostio/bh@latest
 bh auth
 ```
 
-Get your API key from [dashboard.bithost.io/api_keys](https://dashboard.bithost.io/api_keys).
+Get your API key from [dashboard.bithost.io/api/keys](https://dashboard.bithost.io/api/keys).
 
 ## Modes
 
@@ -157,7 +157,7 @@ Environment variables (optional overrides):
 
 **"config not found"** - Run `bh auth`
 
-**"Authentication failed"** - Get a new API key from [dashboard.bithost.io/api_keys](https://dashboard.bithost.io/api_keys)
+**"Authentication failed"** - Get a new API key from [dashboard.bithost.io/api/keys](https://dashboard.bithost.io/api/keys)
 
 **"No SSH keys found"** - Add keys with `bh ssh-keys add` or at [dashboard.bithost.io/keys](https://dashboard.bithost.io/keys)
 

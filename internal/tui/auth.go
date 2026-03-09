@@ -83,7 +83,7 @@ func (m authModel) View() string {
 	b.WriteString("\n\n")
 
 	b.WriteString("Please enter your API key to get started.\n")
-	b.WriteString(subtleStyle.Render("Get your key at: https://dashboard.bithost.io/api_keys"))
+	b.WriteString(subtleStyle.Render("Get your key at: https://dashboard.bithost.io/api/keys"))
 	b.WriteString("\n\n")
 
 	// Input

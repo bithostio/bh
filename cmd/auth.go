@@ -14,7 +14,7 @@ var authCmd = &cobra.Command{
 	Short: "Configure API authentication",
 	Long: `Configure your bithost.io API key for authentication.
 
-Get your API key from: https://dashboard.bithost.io/api_keys`,
+Get your API key from: https://dashboard.bithost.io/api/keys`,
 	RunE: runAuth,
 }
 

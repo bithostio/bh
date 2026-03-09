@@ -70,7 +70,10 @@ type serverCreatedMsg api.Server
 type serverDeletedMsg int
 type keyCreatedMsg api.SSHKey
 type tickMsg time.Time
-type authSuccessMsg struct{}
+type authSuccessMsg struct {
+	cfg    *config.Config
+	client *api.Client
+}
 type clearStatusMsg struct{}
 
 // Run starts the TUI application
@@ -155,7 +158,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.auth, cmd = m.auth.Update(msg)
 			if m.auth.loading {
 				// User pressed enter with valid input
-				cmds = append(cmds, m.authenticate(m.auth.Value()))
+				cmds = append(cmds, authenticate(m.auth.Value()))
 			}
 			if cmd != nil {
 				cmds = append(cmds, cmd)
@@ -297,6 +300,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case authSuccessMsg:
 		m.needsAuth = false
 		m.view = viewDashboard
+		m.cfg = msg.cfg
+		m.client = msg.client
 		m.auth = authModel{} // Clear auth model
 		cmds = append(cmds, m.fetchUser(), m.fetchServers(), tickCmd())
 
@@ -353,8 +358,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.deleting = false
 		m.status = ""
 
-		// Handle auth errors
+		// Redirect to auth view on 401 from any screen
+		if api.IsAuthError(msg.err) && m.view != viewAuth {
+			m.needsAuth = true
+			m.view = viewAuth
+			m.auth = newAuthModel()
+			m.auth = m.auth.SetSize(m.width, m.height)
+			m.auth = m.auth.SetError("Session expired. Please re-enter your API key.")
+			m.err = nil
+			return m, textinput.Blink
+		}
+
+		// Handle auth errors — ignore stale 401s from previous requests
+		// while the user is actively authenticating with a new key
 		if m.view == viewAuth {
+			if api.IsAuthError(msg.err) && m.auth.loading {
+				return m, nil
+			}
 			m.auth = m.auth.SetError(msg.err.Error())
 			m.auth = m.auth.SetLoading(false)
 		}
@@ -433,7 +453,7 @@ func clearStatusCmd() tea.Cmd {
 	})
 }
 
-func (m *Model) authenticate(apiKey string) tea.Cmd {
+func authenticate(apiKey string) tea.Cmd {
 	return func() tea.Msg {
 		// Create config
 		cfg := config.New()
@@ -451,11 +471,7 @@ func (m *Model) authenticate(apiKey string) tea.Cmd {
 			return errMsg{err}
 		}
 
-		// Update model's client and config
-		m.cfg = cfg
-		m.client = client
-
-		return authSuccessMsg{}
+		return authSuccessMsg{cfg: cfg, client: client}
 	}
 }
 
