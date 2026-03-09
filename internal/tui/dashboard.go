@@ -121,6 +121,14 @@ func (m dashboardModel) renderHeader() string {
 	if m.user != nil {
 		userLine = subtleStyle.Render(m.user.Email)
 	}
+	if Version != "" {
+		versionTag := subtleStyle.Render("v" + Version)
+		if userLine != "" {
+			userLine += "  " + versionTag
+		} else {
+			userLine = versionTag
+		}
+	}
 
 	return header + "\n" + userLine
 }

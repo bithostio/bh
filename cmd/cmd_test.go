@@ -23,6 +23,25 @@ func executeCommand(args ...string) (string, error) {
 	return output, execErr
 }
 
+func TestVersionCommand(t *testing.T) {
+	t.Run("prints version", func(t *testing.T) {
+		Version = "0.1.0"
+		defer func() { Version = "dev" }()
+
+		output, err := executeCommand("version")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "0.1.0"))
+	})
+
+	t.Run("prints dev when unset", func(t *testing.T) {
+		Version = "dev"
+
+		output, err := executeCommand("version")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "dev"))
+	})
+}
+
 func TestProvidersCommand(t *testing.T) {
 	t.Setenv("BH_API_KEY", "test-api-key")
 

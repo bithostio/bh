@@ -15,6 +15,7 @@ The TUI provides a visual dashboard for:
   - Creating new servers with a step-by-step wizard
   - Managing SSH keys`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		tui.Version = Version
 		return tui.Run()
 	},
 }

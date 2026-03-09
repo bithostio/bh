@@ -10,6 +10,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+var Version string
+
 // View represents the current screen
 type view int
 
