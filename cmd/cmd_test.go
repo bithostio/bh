@@ -287,6 +287,623 @@ func TestRegionsCommand(t *testing.T) {
 		assert.Nil(t, err)
 		assert.True(t, strings.Contains(capturedReq.URL.RawQuery, "provider=hetzner"))
 	})
+
+	t.Run("displays multiple regions", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.RegionsResponse{
+					Regions: []api.Region{
+						{ID: 1, Name: "Frankfurt", Slug: "fsn1", Origin: "EU"},
+						{ID: 2, Name: "Helsinki", Slug: "hel1", Origin: "EU"},
+						{ID: 3, Name: "Ashburn", Slug: "ash", Origin: "US"},
+					},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("regions", "--provider", "hetzner")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "Frankfurt"))
+		assert.True(t, strings.Contains(output, "Helsinki"))
+		assert.True(t, strings.Contains(output, "Ashburn"))
+	})
+
+	t.Run("handles empty response", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.RegionsResponse{
+					Regions: []api.Region{},
+					Meta:    &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("regions", "--provider", "hetzner")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "No regions found"))
+	})
+
+	t.Run("passes pagination parameter", func(t *testing.T) {
+		var capturedReq *http.Request
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				capturedReq = req
+				return jsonResponse(200, api.RegionsResponse{
+					Regions: []api.Region{},
+					Meta:    &api.Meta{Pagination: api.Pagination{Page: 3}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("regions", "--provider", "hetzner", "--page", "3")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(capturedReq.URL.RawQuery, "page=3"))
+	})
+
+	t.Run("handles API error", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(401, api.ErrorResponse{
+					Errors: []string{"Invalid API key"},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("regions", "--provider", "hetzner")
+		assert.NotNil(t, err)
+		assert.True(t, strings.Contains(err.Error(), "Authentication failed"))
+	})
+}
+
+func TestSizesCommand(t *testing.T) {
+	t.Setenv("BH_API_KEY", "test-api-key")
+
+	t.Run("requires provider flag", func(t *testing.T) {
+		_, err := executeCommand("sizes", "--region", "1")
+		assert.NotNil(t, err)
+	})
+
+	t.Run("requires region flag", func(t *testing.T) {
+		_, err := executeCommand("sizes", "--provider", "hetzner")
+		assert.NotNil(t, err)
+	})
+
+	t.Run("calls correct API endpoint", func(t *testing.T) {
+		var capturedReq *http.Request
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				capturedReq = req
+				return jsonResponse(200, api.SizesResponse{
+					Sizes: []api.Size{
+						{ID: 1, Name: "CX11", Memory: "2048", Processor: "1 vCPU", Disk: "20480", Price: 4.15},
+					},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("sizes", "--provider", "hetzner", "--region", "1")
+		assert.Nil(t, err)
+		assert.NotNil(t, capturedReq)
+		assert.Equal(t, "GET", capturedReq.Method)
+		assert.True(t, strings.HasSuffix(capturedReq.URL.Path, "sizes"))
+		assert.True(t, strings.Contains(capturedReq.URL.RawQuery, "provider=hetzner"))
+		assert.True(t, strings.Contains(capturedReq.URL.RawQuery, "region_id=1"))
+	})
+
+	t.Run("displays multiple sizes", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.SizesResponse{
+					Sizes: []api.Size{
+						{ID: 1, Name: "CX11", Memory: "2048", Processor: "1 vCPU", Disk: "20480", Price: 4.15},
+						{ID: 2, Name: "CX21", Memory: "4096", Processor: "2 vCPU", Disk: "40960", Price: 5.83},
+						{ID: 3, Name: "CX31", Memory: "8192", Processor: "2 vCPU", Disk: "81920", Price: 10.49},
+					},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("sizes", "--provider", "hetzner", "--region", "1")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "CX11"))
+		assert.True(t, strings.Contains(output, "CX21"))
+		assert.True(t, strings.Contains(output, "CX31"))
+	})
+
+	t.Run("handles empty response", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.SizesResponse{
+					Sizes: []api.Size{},
+					Meta:  &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("sizes", "--provider", "hetzner", "--region", "1")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "No sizes found"))
+	})
+
+	t.Run("passes pagination parameter", func(t *testing.T) {
+		var capturedReq *http.Request
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				capturedReq = req
+				return jsonResponse(200, api.SizesResponse{
+					Sizes: []api.Size{},
+					Meta:  &api.Meta{Pagination: api.Pagination{Page: 2}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("sizes", "--provider", "hetzner", "--region", "1", "--page", "2")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(capturedReq.URL.RawQuery, "page=2"))
+	})
+
+	t.Run("handles API error", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(500, api.ErrorResponse{
+					Errors: []string{"Internal server error"},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("sizes", "--provider", "hetzner", "--region", "1")
+		assert.NotNil(t, err)
+	})
+}
+
+func TestImagesCommand(t *testing.T) {
+	t.Setenv("BH_API_KEY", "test-api-key")
+
+	t.Run("requires provider flag", func(t *testing.T) {
+		_, err := executeCommand("images")
+		assert.NotNil(t, err)
+	})
+
+	t.Run("calls correct API endpoint", func(t *testing.T) {
+		var capturedReq *http.Request
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				capturedReq = req
+				return jsonResponse(200, api.ImagesResponse{
+					Images: []api.Image{
+						{ID: 1, Name: "Ubuntu 22.04", Distribution: "Ubuntu", Architecture: "x86"},
+					},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("images", "--provider", "hetzner")
+		assert.Nil(t, err)
+		assert.NotNil(t, capturedReq)
+		assert.Equal(t, "GET", capturedReq.Method)
+		assert.True(t, strings.HasSuffix(capturedReq.URL.Path, "images"))
+		assert.True(t, strings.Contains(capturedReq.URL.RawQuery, "provider=hetzner"))
+	})
+
+	t.Run("passes architecture parameter", func(t *testing.T) {
+		var capturedReq *http.Request
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				capturedReq = req
+				return jsonResponse(200, api.ImagesResponse{
+					Images: []api.Image{},
+					Meta:   &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("images", "--provider", "hetzner", "--arch", "arm")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(capturedReq.URL.RawQuery, "architecture=arm"))
+	})
+
+	t.Run("displays multiple images", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.ImagesResponse{
+					Images: []api.Image{
+						{ID: 1, Name: "Ubuntu 22.04", Distribution: "Ubuntu", Architecture: "x86"},
+						{ID: 2, Name: "Debian 12", Distribution: "Debian", Architecture: "x86"},
+						{ID: 3, Name: "CentOS 9", Distribution: "CentOS", Architecture: "x86"},
+					},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("images", "--provider", "hetzner")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "Ubuntu 22.04"))
+		assert.True(t, strings.Contains(output, "Debian 12"))
+		assert.True(t, strings.Contains(output, "CentOS 9"))
+	})
+
+	t.Run("handles empty response", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.ImagesResponse{
+					Images: []api.Image{},
+					Meta:   &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("images", "--provider", "hetzner")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "No images found"))
+	})
+
+	t.Run("passes pagination parameter", func(t *testing.T) {
+		var capturedReq *http.Request
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				capturedReq = req
+				return jsonResponse(200, api.ImagesResponse{
+					Images: []api.Image{},
+					Meta:   &api.Meta{Pagination: api.Pagination{Page: 2}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("images", "--provider", "hetzner", "--page", "2")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(capturedReq.URL.RawQuery, "page=2"))
+	})
+
+	t.Run("handles API error", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(401, api.ErrorResponse{
+					Errors: []string{"Unauthorized"},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("images", "--provider", "hetzner")
+		assert.NotNil(t, err)
+		assert.True(t, strings.Contains(err.Error(), "Authentication failed"))
+	})
+}
+
+func TestSSHKeysListCommand(t *testing.T) {
+	t.Setenv("BH_API_KEY", "test-api-key")
+
+	t.Run("calls correct API endpoint", func(t *testing.T) {
+		var capturedReq *http.Request
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				capturedReq = req
+				return jsonResponse(200, api.KeysResponse{
+					Keys: []api.SSHKey{
+						{ID: 1, Label: "My Key", Key: "ssh-rsa AAAA..."},
+					},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("ssh-keys", "list")
+		assert.Nil(t, err)
+		assert.NotNil(t, capturedReq)
+		assert.Equal(t, "GET", capturedReq.Method)
+		assert.True(t, strings.HasSuffix(capturedReq.URL.Path, "keys"))
+	})
+
+	t.Run("displays multiple keys", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.KeysResponse{
+					Keys: []api.SSHKey{
+						{ID: 1, Label: "Work Laptop", Key: "ssh-rsa AAAA1..."},
+						{ID: 2, Label: "Home Desktop", Key: "ssh-ed25519 BBBB2..."},
+						{ID: 3, Label: "CI Server", Key: "ssh-rsa CCCC3..."},
+					},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("ssh-keys", "list")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "Work Laptop"))
+		assert.True(t, strings.Contains(output, "Home Desktop"))
+		assert.True(t, strings.Contains(output, "CI Server"))
+	})
+
+	t.Run("passes pagination parameter", func(t *testing.T) {
+		var capturedReq *http.Request
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				capturedReq = req
+				return jsonResponse(200, api.KeysResponse{
+					Keys: []api.SSHKey{},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 2}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("ssh-keys", "list", "--page", "2")
+		assert.Nil(t, err)
+		assert.Equal(t, "page=2", capturedReq.URL.RawQuery)
+	})
+
+	t.Run("handles empty response", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.KeysResponse{
+					Keys: []api.SSHKey{},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("ssh-keys", "list")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "No SSH keys found"))
+	})
+
+	t.Run("handles API error", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(500, api.ErrorResponse{
+					Errors: []string{"Internal server error"},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("ssh-keys", "list")
+		assert.NotNil(t, err)
+	})
+}
+
+func TestServersListAllFlag(t *testing.T) {
+	t.Setenv("BH_API_KEY", "test-api-key")
+
+	t.Run("filters to active servers by default", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.ServersResponse{
+					Servers: []api.Server{
+						{ID: 1, Name: "active-server", Status: "active", Power: true},
+						{ID: 2, Name: "failed-server", Status: "failed"},
+					},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("servers", "list")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "active-server"))
+		assert.True(t, !strings.Contains(output, "failed-server"))
+	})
+
+	t.Run("shows all servers with --all flag", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.ServersResponse{
+					Servers: []api.Server{
+						{ID: 1, Name: "active-server", Status: "active", Power: true},
+						{ID: 2, Name: "failed-server", Status: "failed"},
+					},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("servers", "list", "--all")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "active-server"))
+		assert.True(t, strings.Contains(output, "failed-server"))
+	})
+
+	t.Run("includes pending servers by default", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.ServersResponse{
+					Servers: []api.Server{
+						{ID: 1, Name: "pending-server", Status: "active", Pending: true},
+					},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("servers", "list")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "pending-server"))
+	})
+
+	t.Run("displays multiple servers", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.ServersResponse{
+					Servers: []api.Server{
+						{ID: 1, Name: "web-1", Status: "active", Power: true, IPAddress: "1.2.3.4", Provider: "hetzner"},
+						{ID: 2, Name: "web-2", Status: "active", Power: true, IPAddress: "5.6.7.8", Provider: "hetzner"},
+						{ID: 3, Name: "db-1", Status: "active", Power: true, IPAddress: "9.10.11.12", Provider: "digital_ocean"},
+					},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("servers", "list")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "web-1"))
+		assert.True(t, strings.Contains(output, "web-2"))
+		assert.True(t, strings.Contains(output, "db-1"))
+	})
+}
+
+func TestProvidersMultiple(t *testing.T) {
+	t.Setenv("BH_API_KEY", "test-api-key")
+
+	t.Run("displays multiple providers", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.ProvidersResponse{
+					Providers: []api.Provider{
+						{ID: 1, Name: "Hetzner", Slug: "hetzner"},
+						{ID: 2, Name: "DigitalOcean", Slug: "digital_ocean"},
+						{ID: 3, Name: "Vultr", Slug: "vultr"},
+					},
+					Meta: &api.Meta{Pagination: api.Pagination{Page: 1}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("providers")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "Hetzner"))
+		assert.True(t, strings.Contains(output, "DigitalOcean"))
+		assert.True(t, strings.Contains(output, "Vultr"))
+	})
+}
+
+func TestServersNewCommand(t *testing.T) {
+	t.Setenv("BH_API_KEY", "test-api-key")
+
+	t.Run("requires all flags", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, nil), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("servers", "new")
+		assert.NotNil(t, err)
+
+		_, err = executeCommand("servers", "new", "--name", "test")
+		assert.NotNil(t, err)
+
+		_, err = executeCommand("servers", "new", "--name", "test", "--provider", "hetzner")
+		assert.NotNil(t, err)
+
+		_, err = executeCommand("servers", "new", "--name", "test", "--provider", "hetzner", "--region", "1")
+		assert.NotNil(t, err)
+
+		_, err = executeCommand("servers", "new", "--name", "test", "--provider", "hetzner", "--region", "1", "--size", "1")
+		assert.NotNil(t, err)
+
+		_, err = executeCommand("servers", "new", "--name", "test", "--provider", "hetzner", "--region", "1", "--size", "1", "--image", "1")
+		assert.NotNil(t, err)
+	})
+
+	t.Run("calls correct API endpoint with body", func(t *testing.T) {
+		var capturedReq *http.Request
+		var capturedBody api.CreateServerRequest
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				capturedReq = req
+				json.NewDecoder(req.Body).Decode(&capturedBody)
+				return jsonResponse(200, api.ServerResponse{
+					Server: api.Server{ID: 42, Name: "my-server"},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("servers", "new",
+			"--name", "my-server",
+			"--provider", "hetzner",
+			"--region", "1",
+			"--size", "2",
+			"--image", "3",
+			"--keys", "4,5",
+		)
+		assert.Nil(t, err)
+		assert.NotNil(t, capturedReq)
+		assert.Equal(t, "POST", capturedReq.Method)
+		assert.True(t, strings.HasSuffix(capturedReq.URL.Path, "servers"))
+		assert.Equal(t, "my-server", capturedBody.Name)
+		assert.Equal(t, "hetzner", capturedBody.Provider)
+		assert.Equal(t, 1, capturedBody.RegionID)
+		assert.Equal(t, 2, capturedBody.SizeID)
+		assert.Equal(t, 3, capturedBody.ImageID)
+		assert.Equal(t, true, capturedBody.Terms)
+	})
+
+	t.Run("passes backups flag", func(t *testing.T) {
+		var capturedBody api.CreateServerRequest
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				json.NewDecoder(req.Body).Decode(&capturedBody)
+				return jsonResponse(200, api.ServerResponse{
+					Server: api.Server{ID: 42, Name: "my-server"},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("servers", "new",
+			"--name", "my-server",
+			"--provider", "hetzner",
+			"--region", "1",
+			"--size", "2",
+			"--image", "3",
+			"--keys", "4",
+			"--backups",
+		)
+		assert.Nil(t, err)
+		assert.Equal(t, true, capturedBody.BackupsEnabled)
+	})
+
+	t.Run("handles API error", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(422, api.ErrorResponse{
+					Errors: []string{"Name has already been taken"},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err := executeCommand("servers", "new",
+			"--name", "my-server",
+			"--provider", "hetzner",
+			"--region", "1",
+			"--size", "2",
+			"--image", "3",
+			"--keys", "4",
+		)
+		assert.NotNil(t, err)
+	})
 }
 
 type mockRoundTripper struct {
