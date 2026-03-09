@@ -129,10 +129,10 @@ func (c *Client) CreateSSHKey(req *CreateSSHKeyRequest) (*SSHKey, error) {
 }
 
 // GetUser retrieves the user information including balance and server limit
-func (c *Client) GetUser() (*UserResponse, error) {
+func (c *Client) GetUser() (*User, error) {
 	var resp UserResponse
 	err := c.do("GET", "user", nil, &resp)
-	return &resp, err
+	return &resp.User, err
 }
 
 // do performs an HTTP request with authentication
@@ -181,8 +181,13 @@ func (c *Client) handleErrorResponse(resp *http.Response) error {
 		}
 	}
 
+	messages := make([]string, len(errResp.Errors))
+	for i, e := range errResp.Errors {
+		messages[i] = e.Message
+	}
+
 	return &APIError{
 		StatusCode: resp.StatusCode,
-		Errors:     errResp.Errors,
+		Errors:     messages,
 	}
 }

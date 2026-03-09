@@ -1,8 +1,15 @@
 package api
 
+// ErrorDetail represents a single error object returned by the API
+type ErrorDetail struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+	Field   string `json:"field,omitempty"`
+}
+
 // ErrorResponse represents the error response from the API
 type ErrorResponse struct {
-	Errors []string `json:"errors"`
+	Errors []ErrorDetail `json:"errors"`
 }
 
 // Pagination represents pagination metadata
@@ -22,12 +29,17 @@ type Meta struct {
 	Pagination Pagination `json:"pagination"`
 }
 
-// UserResponse represents the user information response
-type UserResponse struct {
+// User represents the user information
+type User struct {
 	FullName    string  `json:"full_name"`
 	Email       string  `json:"email"`
 	Balance     float64 `json:"balance"`
 	ServerLimit int     `json:"server_limit"`
+}
+
+// UserResponse represents the user information response
+type UserResponse struct {
+	User User `json:"user"`
 }
 
 // Server represents a server resource

@@ -37,7 +37,7 @@ func runUser(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func displayUser(user *api.UserResponse) {
+func displayUser(user *api.User) {
 	threshold := 5.0
 
 	fmt.Printf("\nAccount: %s (%s)\n", cli.Bold(user.FullName), user.Email)

@@ -27,7 +27,7 @@ const (
 type Model struct {
 	cfg    *config.Config
 	client *api.Client
-	user   *api.UserResponse
+	user   *api.User
 
 	// Current view
 	view view
@@ -59,7 +59,7 @@ type errMsg struct{ err error }
 
 func (e errMsg) Error() string { return e.err.Error() }
 
-type userMsg *api.UserResponse
+type userMsg *api.User
 type serversMsg []api.Server
 type providersMsg []api.Provider
 type regionsMsg []api.Region

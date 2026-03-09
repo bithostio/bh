@@ -11,7 +11,7 @@ import (
 
 type dashboardModel struct {
 	servers []api.Server
-	user    *api.UserResponse
+	user    *api.User
 	cursor  int
 	width   int
 	height  int
@@ -44,7 +44,7 @@ func filterActiveServers(servers []api.Server) []api.Server {
 	return active
 }
 
-func (m dashboardModel) SetUser(user *api.UserResponse) dashboardModel {
+func (m dashboardModel) SetUser(user *api.User) dashboardModel {
 	m.user = user
 	return m
 }

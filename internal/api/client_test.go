@@ -86,7 +86,7 @@ func TestCreateServer(t *testing.T) {
 	t.Run("validation error", func(t *testing.T) {
 		client := newMockClient(func(req *http.Request) (*http.Response, error) {
 			return jsonResponse(422, ErrorResponse{
-				Errors: []string{"Name is required"},
+				Errors: []ErrorDetail{{Message: "Name is required", Code: "blank"}},
 			}), nil
 		})
 
@@ -104,7 +104,7 @@ func TestDeleteServer(t *testing.T) {
 		client := newMockClient(func(req *http.Request) (*http.Response, error) {
 			assert.Equal(t, "DELETE", req.Method)
 			assert.True(t, strings.HasSuffix(req.URL.Path, "servers/123"))
-			return jsonResponse(204, nil), nil
+			return jsonResponse(200, ServerResponse{Server: Server{ID: 123, Status: "deleted"}}), nil
 		})
 
 		err := client.DeleteServer(123)
@@ -114,7 +114,7 @@ func TestDeleteServer(t *testing.T) {
 	t.Run("not found", func(t *testing.T) {
 		client := newMockClient(func(req *http.Request) (*http.Response, error) {
 			return jsonResponse(404, ErrorResponse{
-				Errors: []string{"Server not found"},
+				Errors: []ErrorDetail{{Message: "Server not found", Code: "not_found"}},
 			}), nil
 		})
 
@@ -248,10 +248,12 @@ func TestGetUser(t *testing.T) {
 		client := newMockClient(func(req *http.Request) (*http.Response, error) {
 			assert.True(t, strings.HasSuffix(req.URL.Path, "user"))
 			return jsonResponse(200, UserResponse{
-				FullName:    "John Doe",
-				Email:       "john@example.com",
-				Balance:     50.00,
-				ServerLimit: 10,
+				User: User{
+					FullName:    "John Doe",
+					Email:       "john@example.com",
+					Balance:     50.00,
+					ServerLimit: 10,
+				},
 			}), nil
 		})
 
@@ -266,15 +268,15 @@ func TestAPIErrors(t *testing.T) {
 	tests := []struct {
 		name           string
 		statusCode     int
-		errors         []string
+		errors         []ErrorDetail
 		expectedSubstr string
 	}{
-		{"unauthorized", 401, []string{"Invalid API key"}, "Authentication failed"},
-		{"forbidden", 403, []string{"Access denied"}, "Permission denied"},
-		{"not found", 404, []string{"Not found"}, "Resource not found"},
-		{"validation error", 422, []string{"Name is too short"}, "Name is too short"},
-		{"rate limited", 429, []string{"Too many requests"}, "Rate limit exceeded"},
-		{"server error", 500, []string{"Internal server error"}, "Internal server error"},
+		{"unauthorized", 401, []ErrorDetail{{Message: "Invalid API key", Code: "unauthenticated"}}, "Authentication failed"},
+		{"forbidden", 403, []ErrorDetail{{Message: "Access denied", Code: "forbidden"}}, "Permission denied"},
+		{"not found", 404, []ErrorDetail{{Message: "Not found", Code: "not_found"}}, "Resource not found"},
+		{"validation error", 422, []ErrorDetail{{Message: "Name is too short", Code: "blank"}}, "Name is too short"},
+		{"rate limited", 429, []ErrorDetail{{Message: "Too many requests", Code: "rate_limited"}}, "Rate limit exceeded"},
+		{"server error", 500, []ErrorDetail{{Message: "Internal server error", Code: "internal_error"}}, "Internal server error"},
 	}
 
 	for _, tt := range tests {

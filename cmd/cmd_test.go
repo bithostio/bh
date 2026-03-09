@@ -106,7 +106,7 @@ func TestProvidersCommand(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
 				return jsonResponse(401, api.ErrorResponse{
-					Errors: []string{"Invalid API key"},
+					Errors: []api.ErrorDetail{{Message: "Invalid API key", Code: "unauthenticated"}},
 				}), nil
 			},
 		}
@@ -181,7 +181,7 @@ func TestServersListCommand(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
 				return jsonResponse(500, api.ErrorResponse{
-					Errors: []string{"Internal server error"},
+					Errors: []api.ErrorDetail{{Message: "Internal server error", Code: "internal_error"}},
 				}), nil
 			},
 		}
@@ -200,7 +200,7 @@ func TestServerDeleteCommand(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
 				capturedReq = req
-				return jsonResponse(204, nil), nil
+				return jsonResponse(200, api.ServerResponse{Server: api.Server{ID: 123, Status: "deleted"}}), nil
 			},
 		}
 		defer func() { api.HTTPTransport = nil }()
@@ -216,7 +216,7 @@ func TestServerDeleteCommand(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
 				return jsonResponse(404, api.ErrorResponse{
-					Errors: []string{"Server not found"},
+					Errors: []api.ErrorDetail{{Message: "Server not found", Code: "not_found"}},
 				}), nil
 			},
 		}
@@ -235,12 +235,12 @@ func TestUserCommand(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
 				assert.True(t, strings.HasSuffix(req.URL.Path, "user"))
-				return jsonResponse(200, api.UserResponse{
+				return jsonResponse(200, api.UserResponse{User: api.User{
 					FullName:    "John Doe",
 					Email:       "john@example.com",
 					Balance:     25.50,
 					ServerLimit: 10,
-				}), nil
+				}}), nil
 			},
 		}
 		defer func() { api.HTTPTransport = nil }()
@@ -256,12 +256,12 @@ func TestUserCommand(t *testing.T) {
 	t.Run("hides server limit when zero", func(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
-				return jsonResponse(200, api.UserResponse{
+				return jsonResponse(200, api.UserResponse{User: api.User{
 					FullName:    "Admin User",
 					Email:       "admin@example.com",
 					Balance:     100.00,
 					ServerLimit: 0,
-				}), nil
+				}}), nil
 			},
 		}
 		defer func() { api.HTTPTransport = nil }()
@@ -276,7 +276,7 @@ func TestUserCommand(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
 				return jsonResponse(401, api.ErrorResponse{
-					Errors: []string{"Unauthorized"},
+					Errors: []api.ErrorDetail{{Message: "Unauthorized", Code: "unauthenticated"}},
 				}), nil
 			},
 		}
@@ -386,7 +386,7 @@ func TestRegionsCommand(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
 				return jsonResponse(401, api.ErrorResponse{
-					Errors: []string{"Invalid API key"},
+					Errors: []api.ErrorDetail{{Message: "Invalid API key", Code: "unauthenticated"}},
 				}), nil
 			},
 		}
@@ -495,7 +495,7 @@ func TestSizesCommand(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
 				return jsonResponse(500, api.ErrorResponse{
-					Errors: []string{"Internal server error"},
+					Errors: []api.ErrorDetail{{Message: "Internal server error", Code: "internal_error"}},
 				}), nil
 			},
 		}
@@ -615,7 +615,7 @@ func TestImagesCommand(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
 				return jsonResponse(401, api.ErrorResponse{
-					Errors: []string{"Unauthorized"},
+					Errors: []api.ErrorDetail{{Message: "Unauthorized", Code: "unauthenticated"}},
 				}), nil
 			},
 		}
@@ -712,7 +712,7 @@ func TestSSHKeysListCommand(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
 				return jsonResponse(500, api.ErrorResponse{
-					Errors: []string{"Internal server error"},
+					Errors: []api.ErrorDetail{{Message: "Internal server error", Code: "internal_error"}},
 				}), nil
 			},
 		}
@@ -926,7 +926,7 @@ func TestServersNewCommand(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
 				return jsonResponse(422, api.ErrorResponse{
-					Errors: []string{"Name has already been taken"},
+					Errors: []api.ErrorDetail{{Message: "Name has already been taken", Code: "taken"}},
 				}), nil
 			},
 		}
