@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO="bithostio/bh"
-INSTALL_DIR="/usr/local/bin"
+INSTALL_DIR="${HOME}/.local/bin"
 BINARY_NAME="bh"
 
 # Detect OS.
@@ -48,12 +48,13 @@ trap 'rm -rf "$TMPDIR"' EXIT
 curl -fsSL -o "${TMPDIR}/${BINARY_NAME}${SUFFIX}" "$URL"
 chmod +x "${TMPDIR}/${BINARY_NAME}${SUFFIX}"
 
-# Install, elevating with sudo if needed.
-if [ -w "$INSTALL_DIR" ]; then
-  mv "${TMPDIR}/${BINARY_NAME}${SUFFIX}" "${INSTALL_DIR}/${BINARY_NAME}${SUFFIX}"
-else
-  echo "Installing to ${INSTALL_DIR} (requires sudo)..."
-  sudo mv "${TMPDIR}/${BINARY_NAME}${SUFFIX}" "${INSTALL_DIR}/${BINARY_NAME}${SUFFIX}"
-fi
+mkdir -p "$INSTALL_DIR"
+install -m 755 "${TMPDIR}/${BINARY_NAME}${SUFFIX}" "${INSTALL_DIR}/${BINARY_NAME}${SUFFIX}"
 
 echo "Installed ${BINARY_NAME} ${TAG} to ${INSTALL_DIR}/${BINARY_NAME}${SUFFIX}"
+
+if ! echo "$PATH" | tr ':' '\n' | grep -qx "$INSTALL_DIR"; then
+  echo ""
+  echo "Add ${INSTALL_DIR} to your PATH:"
+  echo "  export PATH=\"${INSTALL_DIR}:\$PATH\""
+fi
