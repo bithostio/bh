@@ -5,14 +5,15 @@ Official command-line interface for [Bithost.io](https://bithost.io).
 ## Installation
 
 ```bash
-# From source
+curl -fsSL https://bithost.io/cli | bash
+```
+
+Or build from source:
+
+```bash
 git clone https://github.com/bithostio/bh.git
 cd bh
 make build
-sudo mv bh /usr/local/bin/
-
-# Or using go install
-go install github.com/bithostio/bh@latest
 ```
 
 ## Quick Start
