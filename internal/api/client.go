@@ -114,17 +114,8 @@ func (c *Client) ListSSHKeys(page int) (*KeysResponse, error) {
 
 // CreateSSHKey creates a new SSH key
 func (c *Client) CreateSSHKey(req *CreateSSHKeyRequest) (*SSHKey, error) {
-	// Wrap the request in a "key" object as expected by Rails
-	wrappedReq := map[string]any{
-		"key": map[string]any{
-			"label": req.Label,
-			"key":   req.Key,
-		},
-		"provider": req.Provider,
-	}
-
 	var resp KeyResponse
-	err := c.do("POST", "keys", wrappedReq, &resp)
+	err := c.do("POST", "keys", req, &resp)
 	return &resp.Key, err
 }
 

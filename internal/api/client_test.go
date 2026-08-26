@@ -220,13 +220,11 @@ func TestCreateSSHKey(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		client := newMockClient(func(req *http.Request) (*http.Response, error) {
 			body, _ := io.ReadAll(req.Body)
-			var wrapped map[string]any
-			err := json.Unmarshal(body, &wrapped)
+			var payload map[string]any
+			err := json.Unmarshal(body, &payload)
 			assert.Nil(t, err)
-
-			keyData, ok := wrapped["key"].(map[string]any)
-			assert.True(t, ok)
-			assert.Equal(t, "my-key", keyData["label"])
+			assert.Equal(t, "my-key", payload["label"])
+			assert.Equal(t, "ssh-rsa AAAA...", payload["key"])
 
 			return jsonResponse(200, KeyResponse{
 				Key: SSHKey{ID: 1, Label: "my-key", Key: "ssh-rsa AAAA..."},
