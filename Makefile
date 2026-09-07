@@ -1,4 +1,4 @@
-.PHONY: build clean install test modernize all build-all help
+.PHONY: build clean install test modernize all build-all release help
 
 # Binary name
 BINARY_NAME=bh
@@ -62,6 +62,13 @@ install: build ## Install binary to $GOPATH/bin
 test: ## Run tests
 	@echo "Running tests..."
 	@go test -v ./...
+
+release: ## Tag, build, and publish a GitHub release (make release VERSION=v0.1.2)
+	@if [ "$(origin VERSION)" = "file" ]; then \
+		echo "Error: VERSION is required, e.g. make release VERSION=v0.1.2"; \
+		exit 1; \
+	fi
+	@./scripts/release.sh "$(VERSION)"
 
 modernize: ## Run modernize tool to update code
 	@echo "Running modernize..."
