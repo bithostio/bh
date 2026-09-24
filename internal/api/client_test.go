@@ -160,6 +160,17 @@ func TestListRegions(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Len(t, 2, resp.Regions)
 	})
+
+	t.Run("escapes query parameters", func(t *testing.T) {
+		client := newMockClient(func(req *http.Request) (*http.Response, error) {
+			assert.Equal(t, "a&page=9", req.URL.Query().Get("provider"))
+			assert.Equal(t, "", req.URL.Query().Get("page"))
+			return jsonResponse(200, RegionsResponse{}), nil
+		})
+
+		_, err := client.ListRegions("a&page=9", 0)
+		assert.Nil(t, err)
+	})
 }
 
 func TestListSizes(t *testing.T) {

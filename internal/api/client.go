@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -37,11 +39,7 @@ func NewClient(baseURL, apiKey string) *Client {
 // ListServers retrieves all servers for the authenticated user
 func (c *Client) ListServers(page int) (*ServersResponse, error) {
 	var resp ServersResponse
-	path := "servers"
-	if page > 0 {
-		path = fmt.Sprintf("servers?page=%d", page)
-	}
-	err := c.do("GET", path, nil, &resp)
+	err := c.do("GET", withQuery("servers", url.Values{}, page), nil, &resp)
 	return &resp, err
 }
 
@@ -60,55 +58,38 @@ func (c *Client) DeleteServer(id int) error {
 // ListProviders retrieves all available cloud providers
 func (c *Client) ListProviders(page int) (*ProvidersResponse, error) {
 	var resp ProvidersResponse
-	path := "providers"
-	if page > 0 {
-		path = fmt.Sprintf("providers?page=%d", page)
-	}
-	err := c.do("GET", path, nil, &resp)
+	err := c.do("GET", withQuery("providers", url.Values{}, page), nil, &resp)
 	return &resp, err
 }
 
 // ListRegions retrieves regions for a provider
 func (c *Client) ListRegions(provider string, page int) (*RegionsResponse, error) {
 	var resp RegionsResponse
-	path := fmt.Sprintf("regions?provider=%s", provider)
-	if page > 0 {
-		path = fmt.Sprintf("regions?provider=%s&page=%d", provider, page)
-	}
-	err := c.do("GET", path, nil, &resp)
+	params := url.Values{"provider": {provider}}
+	err := c.do("GET", withQuery("regions", params, page), nil, &resp)
 	return &resp, err
 }
 
 // ListSizes retrieves available server sizes
 func (c *Client) ListSizes(regionID int, provider string, page int) (*SizesResponse, error) {
 	var resp SizesResponse
-	path := fmt.Sprintf("sizes?region_id=%d&provider=%s", regionID, provider)
-	if page > 0 {
-		path = fmt.Sprintf("sizes?region_id=%d&provider=%s&page=%d", regionID, provider, page)
-	}
-	err := c.do("GET", path, nil, &resp)
+	params := url.Values{"region_id": {strconv.Itoa(regionID)}, "provider": {provider}}
+	err := c.do("GET", withQuery("sizes", params, page), nil, &resp)
 	return &resp, err
 }
 
 // ListImages retrieves available OS images
 func (c *Client) ListImages(provider string, architecture string, page int) (*ImagesResponse, error) {
 	var resp ImagesResponse
-	path := fmt.Sprintf("images?provider=%s&architecture=%s&type=STANDARD", provider, architecture)
-	if page > 0 {
-		path = fmt.Sprintf("images?provider=%s&architecture=%s&type=STANDARD&page=%d", provider, architecture, page)
-	}
-	err := c.do("GET", path, nil, &resp)
+	params := url.Values{"provider": {provider}, "architecture": {architecture}, "type": {"STANDARD"}}
+	err := c.do("GET", withQuery("images", params, page), nil, &resp)
 	return &resp, err
 }
 
 // ListSSHKeys retrieves the user's SSH keys
 func (c *Client) ListSSHKeys(page int) (*KeysResponse, error) {
 	var resp KeysResponse
-	path := "keys"
-	if page > 0 {
-		path = fmt.Sprintf("keys?page=%d", page)
-	}
-	err := c.do("GET", path, nil, &resp)
+	err := c.do("GET", withQuery("keys", url.Values{}, page), nil, &resp)
 	return &resp, err
 }
 
@@ -124,6 +105,17 @@ func (c *Client) GetUser() (*User, error) {
 	var resp UserResponse
 	err := c.do("GET", "user", nil, &resp)
 	return &resp.User, err
+}
+
+// withQuery appends the URL-encoded params to path, adding page when set
+func withQuery(path string, params url.Values, page int) string {
+	if page > 0 {
+		params.Set("page", strconv.Itoa(page))
+	}
+	if len(params) == 0 {
+		return path
+	}
+	return path + "?" + params.Encode()
 }
 
 // do performs an HTTP request with authentication
