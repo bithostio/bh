@@ -61,7 +61,7 @@ func runSSHKeysList(cmd *cobra.Command, args []string) error {
 	}
 
 	cli.PrintTable(rows)
-	cli.DisplayPagination(resp.Meta.Pagination)
+	cli.DisplayPagination(resp.Meta)
 
 	return nil
 }

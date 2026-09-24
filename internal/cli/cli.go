@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bithostio/bh/internal/api"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -107,29 +108,28 @@ func ShowProgress(message string) (stop, cancel func()) {
 	return wait(done), wait(clear)
 }
 
-type Paginator interface {
-	GetPage() int
-	HasPrevious() bool
-	HasNext() bool
-}
+func DisplayPagination(meta *api.Meta) {
+	if meta == nil {
+		return
+	}
 
-func DisplayPagination(p Paginator) {
-	if p.GetPage() == 1 && !p.HasNext() {
+	p := meta.Pagination
+	if p.Page == 1 && !p.HasNextPage {
 		return
 	}
 
 	var hints []string
-	if p.HasPrevious() {
-		hints = append(hints, Gray(fmt.Sprintf("--page %d for previous", p.GetPage()-1)))
+	if p.HasPreviousPage {
+		hints = append(hints, Gray(fmt.Sprintf("--page %d for previous", p.Page-1)))
 	}
-	if p.HasNext() {
-		hints = append(hints, Gray(fmt.Sprintf("--page %d for next", p.GetPage()+1)))
+	if p.HasNextPage {
+		hints = append(hints, Gray(fmt.Sprintf("--page %d for next", p.Page+1)))
 	}
 
 	fmt.Println()
 	if len(hints) > 0 {
-		fmt.Printf("Page %d (%s)\n", p.GetPage(), strings.Join(hints, ", "))
+		fmt.Printf("Page %d (%s)\n", p.Page, strings.Join(hints, ", "))
 	} else {
-		fmt.Printf("Page %d\n", p.GetPage())
+		fmt.Printf("Page %d\n", p.Page)
 	}
 }

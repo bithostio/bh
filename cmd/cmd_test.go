@@ -177,6 +177,21 @@ func TestServersListCommand(t *testing.T) {
 		assert.True(t, strings.Contains(output, "servers found"))
 	})
 
+	t.Run("handles missing meta", func(t *testing.T) {
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				return jsonResponse(200, api.ServersResponse{
+					Servers: []api.Server{{ID: 1, Name: "web-server", Status: "active", Power: true}},
+				}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		output, err := executeCommand("servers", "list")
+		assert.Nil(t, err)
+		assert.True(t, strings.Contains(output, "web-server"))
+	})
+
 	t.Run("handles API error", func(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {

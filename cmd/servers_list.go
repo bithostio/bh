@@ -48,7 +48,7 @@ func runServerList(cmd *cobra.Command, args []string) error {
 	}
 
 	displayServers(servers, showAllServers)
-	cli.DisplayPagination(resp.Meta.Pagination)
+	cli.DisplayPagination(resp.Meta)
 	return nil
 }
 
