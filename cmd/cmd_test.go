@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -717,6 +718,30 @@ func TestSSHKeysListCommand(t *testing.T) {
 
 		_, err := executeCommand("ssh-keys", "list")
 		assert.NotNil(t, err)
+	})
+}
+
+func TestSSHKeysAddCommand(t *testing.T) {
+	t.Setenv("BH_API_KEY", "test-api-key")
+
+	t.Run("expands ~ in --file", func(t *testing.T) {
+		home := t.TempDir()
+		t.Setenv("HOME", home)
+		err := os.WriteFile(filepath.Join(home, "key.pub"), []byte("ssh-ed25519 AAAA test\n"), 0600)
+		assert.Nil(t, err)
+
+		var capturedBody api.CreateSSHKeyRequest
+		api.HTTPTransport = &mockRoundTripper{
+			handler: func(req *http.Request) (*http.Response, error) {
+				json.NewDecoder(req.Body).Decode(&capturedBody)
+				return jsonResponse(200, api.KeyResponse{Key: api.SSHKey{ID: 1, Label: "laptop"}}), nil
+			},
+		}
+		defer func() { api.HTTPTransport = nil }()
+
+		_, err = executeCommand("ssh-keys", "add", "--label", "laptop", "--file", "~/key.pub")
+		assert.Nil(t, err)
+		assert.Equal(t, "ssh-ed25519 AAAA test", capturedBody.Key)
 	})
 }
 

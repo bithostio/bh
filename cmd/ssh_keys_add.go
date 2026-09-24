@@ -69,11 +69,10 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 	if keyContent != "" {
 		publicKey = keyContent
 	} else if keyFile != "" {
-		data, err := os.ReadFile(keyFile)
+		publicKey, err = readKeyFile(keyFile)
 		if err != nil {
-			return fmt.Errorf("failed to read key file: %w", err)
+			return err
 		}
-		publicKey = strings.TrimSpace(string(data))
 	} else {
 		path, err := cli.Input("Path to SSH public key file",
 			cli.WithDefault("~/.ssh/id_rsa.pub"),
@@ -82,19 +81,10 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		if strings.HasPrefix(path, "~/") {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				return err
-			}
-			path = strings.Replace(path, "~", home, 1)
-		}
-
-		data, err := os.ReadFile(path)
+		publicKey, err = readKeyFile(path)
 		if err != nil {
-			return fmt.Errorf("failed to read key file: %w", err)
+			return err
 		}
-		publicKey = strings.TrimSpace(string(data))
 	}
 
 	if publicKey == "" {
@@ -122,4 +112,20 @@ func runSSHKeysAdd(cmd *cobra.Command, args []string) error {
 	fmt.Printf("  Label: %s\n", key.Label)
 
 	return nil
+}
+
+func readKeyFile(path string) (string, error) {
+	if strings.HasPrefix(path, "~/") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		path = strings.Replace(path, "~", home, 1)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to read key file: %w", err)
+	}
+	return strings.TrimSpace(string(data)), nil
 }
