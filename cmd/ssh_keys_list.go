@@ -48,9 +48,9 @@ func runSSHKeysList(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, key := range resp.Keys {
-		fingerprint := key.Key
-		if len(fingerprint) > 50 {
-			fingerprint = fingerprint[:47] + "..."
+		fingerprint := key.Fingerprint()
+		if fingerprint == "" {
+			fingerprint = "-"
 		}
 
 		rows = append(rows, []string{

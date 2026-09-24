@@ -1,5 +1,11 @@
 package api
 
+import (
+	"crypto/sha256"
+	"encoding/base64"
+	"strings"
+)
+
 // ErrorDetail represents a single error object returned by the API
 type ErrorDetail struct {
 	Code    string `json:"code"`
@@ -100,6 +106,21 @@ type SSHKey struct {
 	ID    int    `json:"id"`
 	Key   string `json:"key"`
 	Label string `json:"label"`
+}
+
+// Fingerprint returns the SHA256 fingerprint of the key, as shown by
+// ssh-keygen -l, or an empty string if the key can't be parsed.
+func (k SSHKey) Fingerprint() string {
+	fields := strings.Fields(k.Key)
+	if len(fields) < 2 {
+		return ""
+	}
+	blob, err := base64.StdEncoding.DecodeString(fields[1])
+	if err != nil {
+		return ""
+	}
+	sum := sha256.Sum256(blob)
+	return "SHA256:" + base64.RawStdEncoding.EncodeToString(sum[:])
 }
 
 // CreateServerRequest represents the request to create a server
