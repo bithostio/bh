@@ -9,8 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var providersPage int
-
 var providersCmd = &cobra.Command{
 	Use:   "providers",
 	Short: "List available cloud providers",
@@ -19,7 +17,6 @@ var providersCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(providersCmd)
-	providersCmd.Flags().IntVar(&providersPage, "page", 0, "Page number (optional)")
 }
 
 func runProviders(cmd *cobra.Command, args []string) error {
@@ -30,7 +27,7 @@ func runProviders(cmd *cobra.Command, args []string) error {
 
 	client := api.NewClient(cfg.BaseURL, cfg.APIKey)
 
-	resp, err := client.ListProviders(providersPage)
+	resp, err := client.ListProviders(0)
 	if err != nil {
 		return err
 	}

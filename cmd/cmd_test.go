@@ -68,24 +68,6 @@ func TestProvidersCommand(t *testing.T) {
 		assert.True(t, strings.HasPrefix(capturedReq.Header.Get("Authorization"), "Bearer "))
 	})
 
-	t.Run("passes pagination parameter", func(t *testing.T) {
-		var capturedReq *http.Request
-		api.HTTPTransport = &mockRoundTripper{
-			handler: func(req *http.Request) (*http.Response, error) {
-				capturedReq = req
-				return jsonResponse(200, api.ProvidersResponse{
-					Providers: []api.Provider{},
-					Meta:      &api.Meta{Pagination: api.Pagination{Page: 2}},
-				}), nil
-			},
-		}
-		defer func() { api.HTTPTransport = nil }()
-
-		_, err := executeCommand("providers", "--page", "2")
-		assert.Nil(t, err)
-		assert.Equal(t, "page=2", capturedReq.URL.RawQuery)
-	})
-
 	t.Run("handles empty response", func(t *testing.T) {
 		api.HTTPTransport = &mockRoundTripper{
 			handler: func(req *http.Request) (*http.Response, error) {
