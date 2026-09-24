@@ -124,9 +124,6 @@ bh ssh-keys add --label "my-key" --file ~/.ssh/id_rsa.pub
 
 # Add SSH key directly
 bh ssh-keys add --label "my-key" --key "ssh-rsa AAAA..."
-
-# Add SSH key for a specific provider (default: digital_ocean)
-bh ssh-keys add --label "my-key" --file ~/.ssh/id_rsa.pub --provider digital_ocean
 ```
 
 ### Account

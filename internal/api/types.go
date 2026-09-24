@@ -116,9 +116,8 @@ type CreateServerRequest struct {
 
 // CreateSSHKeyRequest represents the request to create an SSH key
 type CreateSSHKeyRequest struct {
-	Label    string `json:"label"`
-	Key      string `json:"key"`
-	Provider string `json:"provider,omitempty"`
+	Label string `json:"label"`
+	Key   string `json:"key"`
 }
 
 // Response wrappers for API responses

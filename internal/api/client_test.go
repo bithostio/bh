@@ -243,9 +243,8 @@ func TestCreateSSHKey(t *testing.T) {
 		})
 
 		key, err := client.CreateSSHKey(&CreateSSHKeyRequest{
-			Label:    "my-key",
-			Key:      "ssh-rsa AAAA...",
-			Provider: "hetzner",
+			Label: "my-key",
+			Key:   "ssh-rsa AAAA...",
 		})
 		assert.Nil(t, err)
 		assert.Equal(t, 1, key.ID)
